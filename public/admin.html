@@ -82,42 +82,42 @@
   </main>
   <div class="modal-backdrop" id="projModalBackdrop" aria-hidden="true">
 	  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="projModalTitle">
-		<h2 style="margin:0 0 12px; font-size:16px;">프로젝트 편집</h2>
-		
-		<div class="field">
-		  <label for="projTitleInput">제목</label>
-		  <input class="input" id="projTitleInput" type="text" />
-		</div>
-		
-		<div class="muted" id="projMeta" style="margin-top:8px;"></div>
-		
-		<div class="field" style="margin-top:12px;">
-		  <label for="projDescInput">설명 (여러 줄 가능)</label>
-		  <textarea class="textarea" id="projDescInput" style="min-height:140px;"></textarea>
-		</div>
-		
-		<div class="field" style="margin-top:12px;">
-		  <label>상태</label>
-		  <div class="row" style="gap:10px;">
-		    <button class="btn" id="btnProjTogglePublic"></button>
-		    <button class="btn" id="btnProjTogglePin"></button>
-		    <button class="btn primary" id="btnProjSave">저장</button>
-		    <button class="btn danger" id="btnProjDelete">삭제</button>
-		  </div>
-		  <div class="muted" id="projActionStatus" style="margin-top:8px;"></div>
-		</div>
-		
-		<div class="field" style="margin-top:12px;">
-		  <label>이미지(1~3)</label>
-		  <div id="projImages" class="row" style="gap:10px; flex-direction:column;"></div>
-		  <div class="muted" id="projImgStatus" style="margin-top:6px;"></div>
-		</div>
-		
-		<div class="modal-actions">
-		  <button class="btn" id="projModalClose">닫기</button>
-		</div>
+			<h2 style="margin:0 0 12px; font-size:16px;">프로젝트 편집</h2>
+			
+			<div class="field">
+			  <label for="projTitleInput">제목</label>
+			  <input class="input" id="projTitleInput" type="text" />
+			</div>
+			
+			<div class="muted" id="projMeta" style="margin-top:8px;"></div>
+			
+			<div class="field" style="margin-top:12px;">
+			  <label for="projDescInput">설명 (여러 줄 가능)</label>
+			  <textarea class="textarea" id="projDescInput" style="min-height:140px;"></textarea>
+			</div>
+			
+			<div class="field" style="margin-top:12px;">
+			  <label>상태</label>
+			  <div class="row" style="gap:10px;">
+			    <button class="btn" id="btnProjTogglePublic"></button>
+			    <button class="btn" id="btnProjTogglePin"></button>
+			    <button class="btn primary" id="btnProjSave">저장</button>
+			    <button class="btn danger" id="btnProjDelete">삭제</button>
+			  </div>
+			  <div class="muted" id="projActionStatus" style="margin-top:8px;"></div>
+			</div>
+			
+			<div class="field" style="margin-top:12px;">
+			  <label>이미지(1~3)</label>
+			  <div id="projImages" class="row" style="gap:10px; flex-direction:column;"></div>
+			  <div class="muted" id="projImgStatus" style="margin-top:6px;"></div>
+			</div>
+			
+			<div class="modal-actions">
+			  <button class="btn" id="projModalClose">닫기</button>
+			</div>
+  		</div>
   </div>
-  
   <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true">
 	  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
 	    <h2 id="modalTitle">프로젝트 추가</h2>
@@ -207,15 +207,18 @@
 
     let currentProject = null; // {id, title, description, isPublic, pinned}
     function openProjModal() {
-      closeModal();
-      projModalBackdrop.style.display = "flex";
-      projModalBackdrop.removeAttribute("aria-hidden");
-      setTimeout(() => projModalClose.focus(), 0);
-    function closeProjModal() {
-      if (projModalBackdrop.contains(document.activeElement)) document.activeElement.blur();
-      projModalBackdrop.style.display = "none";
-      projModalBackdrop.setAttribute("aria-hidden", "true");
-    }
+    	  closeModal(); // 다른 모달 닫기
+    	  projModalBackdrop.style.display = "flex";
+    	  projModalBackdrop.removeAttribute("aria-hidden");
+    	  setTimeout(() => projModalClose.focus(), 0);
+    	}
+
+    	function closeProjModal() {
+    	  if (projModalBackdrop.contains(document.activeElement)) document.activeElement.blur();
+    	  projModalBackdrop.style.display = "none";
+    	  projModalBackdrop.setAttribute("aria-hidden", "true");
+    	}
+
     projModalClose.addEventListener("click", closeProjModal);
     projModalBackdrop.addEventListener("click", (e) => { if (e.target === projModalBackdrop) closeProjModal(); });
     document.addEventListener("keydown", (e) => {
@@ -226,7 +229,7 @@
       // ✅ 서버에 새 API 만들지 않고, 이미 있는 목록 API에서 찾아서 씀
       const res = await fetch("/api/admin/projects");
       if (!res.ok) {
-        projModalTitle.textContent = `불러오기 실패 (HTTP ${res.status})`;
+    	 projActionStatus.textContent = `불러오기 실패 (HTTP ${res.status})`;
         return null;
       }
       const data = await res.json();
