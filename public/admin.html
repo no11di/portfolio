@@ -23,6 +23,16 @@
     .badge.private { background: rgba(255, 180, 0, 0.15); }
     .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
     .right { text-align:right; }
+    .modal-backdrop { position: fixed; inset:0; background: rgba(0,0,0,0.6); display:none; align-items:center; justify-content:center; padding:20px; }
+	.modal { width:min(720px, 100%); background:#111; border:1px solid #2a2a2a; border-radius:14px; padding:16px; }
+	.modal h2 { margin:0 0 12px; font-size:16px; }
+	.field { display:flex; flex-direction:column; gap:6px; margin-top:10px; }
+	.field label { color:#bbb; font-size:13px; }
+	.input, .textarea { background:#0b0b0b; color:#fff; border:1px solid #333; border-radius:10px; padding:10px 12px; }
+	.textarea { min-height:140px; resize:vertical; white-space:pre-wrap; }
+	.modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:14px; }
+	.btn.primary { background:#ffffff; color:#000; border-color:#fff; }
+	.btn.danger { border-color:#7a2c2c; }
   </style>
 </head>
 <body>
@@ -39,6 +49,7 @@
           <div class="mono" id="apiBase"></div>
         </div>
         <div class="row">
+          <button class="btn" id="btnAdd">+ 항목추가</button>        
           <button class="btn" id="btnReload">새로고침</button>
         </div>
       </div>
@@ -58,7 +69,29 @@
       </table>
     </div>
   </main>
-
+  <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true">
+	  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+	    <h2 id="modalTitle">프로젝트 추가</h2>
+	
+	    <div class="field">
+	      <label for="inpTitle">제목</label>
+	      <input class="input" id="inpTitle" type="text" placeholder="예: 빗썸 코인대여 서비스" />
+	    </div>
+	
+	    <div class="field">
+	      <label for="inpDesc">설명 (여러 줄 가능)</label>
+	      <textarea class="textarea" id="inpDesc" placeholder="여기에 설명을 입력하세요."></textarea>
+	    </div>
+	
+	    <div class="modal-actions">
+	      <button class="btn" id="btnCancel">취소</button>
+	      <button class="btn primary" id="btnSave">저장 후 업로드</button>
+	    </div>
+	
+	    <div class="muted" id="modalStatus" style="margin-top:10px;"></div>
+	  </div>
+  </div>
+  
   <script>
     const API_BASE = location.origin; // 같은 도메인
     document.getElementById("apiBase").textContent = API_BASE;
@@ -67,6 +100,73 @@
     const tbl = document.getElementById("tbl");
     const tbody = document.getElementById("tbody");
     const btnReload = document.getElementById("btnReload");
+    const btnAdd = document.getElementById("btnAdd");
+    const modalBackdrop = document.getElementById("modalBackdrop");
+    const inpTitle = document.getElementById("inpTitle");
+    const inpDesc = document.getElementById("inpDesc");
+    const btnCancel = document.getElementById("btnCancel");
+    const btnSave = document.getElementById("btnSave");
+    const modalStatus = document.getElementById("modalStatus");
+
+    function openModal() {
+      modalStatus.textContent = "";
+      inpTitle.value = "";
+      inpDesc.value = "";
+      modalBackdrop.style.display = "flex";
+      modalBackdrop.setAttribute("aria-hidden", "false");
+      inpTitle.focus();
+    }
+
+    function closeModal() {
+      modalBackdrop.style.display = "none";
+      modalBackdrop.setAttribute("aria-hidden", "true");
+    }
+
+    btnAdd.addEventListener("click", openModal);
+    btnCancel.addEventListener("click", closeModal);
+    modalBackdrop.addEventListener("click", (e) => {
+      if (e.target === modalBackdrop) closeModal();
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && modalBackdrop.style.display === "flex") closeModal();
+    });
+
+    btnSave.addEventListener("click", async () => {
+      const title = (inpTitle.value || "").trim();
+      const description = (inpDesc.value || "").toString();
+
+      if (!title) {
+        modalStatus.textContent = "제목은 필수입니다.";
+        return;
+      }
+
+      btnSave.disabled = true;
+      modalStatus.textContent = "저장 중...";
+
+      try {
+        const res = await fetch(`${API_BASE}/api/admin/projects`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title, description })
+        });
+
+        const data = await res.json().catch(() => null);
+
+        if (!res.ok || !data?.ok) {
+          modalStatus.textContent = `저장 실패 (HTTP ${res.status})`;
+          btnSave.disabled = false;
+          return;
+        }
+
+        modalStatus.textContent = "저장 완료!";
+        closeModal();
+        await loadProjects(); // 저장 후 목록 갱신
+      } catch (err) {
+        modalStatus.textContent = "저장 중 오류가 발생했습니다.";
+      } finally {
+        btnSave.disabled = false;
+      }
+    });
 
     function escapeHtml(s) {
       return String(s).replace(/[&<>"']/g, (m) => ({
