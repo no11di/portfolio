@@ -173,13 +173,44 @@
     const btnProjSave = document.getElementById("btnProjSave");
     const btnProjDelete = document.getElementById("btnProjDelete");
     const projActionStatus = document.getElementById("projActionStatus");
+    btnProjTogglePin.addEventListener("click", async () => {
+    	  if (!currentProject) return;
+
+    	  const next = !currentProject.pinned;
+    	  projActionStatus.textContent = "고정 상태 변경 중...";
+    	  btnProjTogglePin.disabled = true;
+
+    	  try {
+    	    const res = await fetch(`/api/admin/projects/${currentProject.id}/pin`, {
+    	      method: "PATCH",
+    	      headers: { "Content-Type": "application/json" },
+    	      body: JSON.stringify({ pinned: next })
+    	    });
+
+    	    const data = await res.json().catch(()=>null);
+    	    if (!res.ok || !data?.ok) {
+    	      projActionStatus.textContent = `변경 실패 (HTTP ${res.status})`;
+    	      return;
+    	    }
+
+    	    currentProject.pinned = next;        // ⭐ 상태 업데이트
+    	    refreshProjectButtons();              // ⭐ 버튼명 갱신
+    	    projMeta.textContent = `ID ${currentProject.id} · ${currentProject.isPublic ? "공개" : "비공개"} · ${currentProject.pinned ? "상단고정" : "일반"}`;
+    	    projActionStatus.textContent = next ? "상단 고정됨" : "고정 해제됨";
+
+    	    await loadProjects(); // 목록 순서도 즉시 반영
+    	  } finally {
+    	    btnProjTogglePin.disabled = false;
+    	  }
+    	});
+
 
     let currentProject = null; // {id, title, description, isPublic, pinned}
     function openProjModal() {
+      closeModal();
       projModalBackdrop.style.display = "flex";
       projModalBackdrop.removeAttribute("aria-hidden");
       setTimeout(() => projModalClose.focus(), 0);
-    }
     function closeProjModal() {
       if (projModalBackdrop.contains(document.activeElement)) document.activeElement.blur();
       projModalBackdrop.style.display = "none";
@@ -306,18 +337,28 @@
 
 
     function openModal() {
-      modalStatus.textContent = "";
-      inpTitle.value = "";
-      inpDesc.value = "";
-      modalBackdrop.style.display = "flex";
-      modalBackdrop.setAttribute("aria-hidden", "false");
-      inpTitle.focus();
-    }
+    	  // 다른 모달이 열려있으면 닫기
+    	  closeProjModal();
 
-    function closeModal() {
-      modalBackdrop.style.display = "none";
-      modalBackdrop.setAttribute("aria-hidden", "true");
-    }
+    	  modalStatus.textContent = "";
+    	  inpTitle.value = "";
+    	  inpDesc.value = "";
+
+    	  modalBackdrop.style.display = "flex";
+    	  modalBackdrop.removeAttribute("aria-hidden");
+
+    	  setTimeout(() => inpTitle.focus(), 0);
+    	}
+
+    	function closeModal() {
+    	  // 모달 안에 포커스가 있으면 먼저 blur
+    	  if (modalBackdrop.contains(document.activeElement)) {
+    	    document.activeElement.blur();
+    	  }
+    	  modalBackdrop.style.display = "none";
+    	  modalBackdrop.setAttribute("aria-hidden", "true");
+    	}
+
 
     btnAdd.addEventListener("click", openModal);
     btnCancel.addEventListener("click", closeModal);
@@ -439,17 +480,20 @@
     	  const deleteBtn = e.target.closest(".btn-delete");
     	  const pinBtn = e.target.closest(".btn-pin");
     	  if (pinBtn) {
-    	    const id = pinBtn.dataset.id;
-    	    const pinned = pinBtn.dataset.pinned === "true";
+    		  const id = pinBtn.dataset.id;
 
-    	    await fetch(`/api/admin/projects/${id}/pin`, {
-    	      method: "PATCH",
-    	      headers: { "Content-Type": "application/json" },
-    	      body: JSON.stringify({ pinned: !pinned })
-    	    });
+    		  const pinnedRaw = pinBtn.dataset.pinned; // "true"/"false" 또는 "1"/"0"
+    		  const pinned = (pinnedRaw === "true" || pinnedRaw === "1");
 
-    	    await loadProjects();
-    	  }
+    		  await fetch(`/api/admin/projects/${id}/pin`, {
+    		    method: "PATCH",
+    		    headers: { "Content-Type": "application/json" },
+    		    body: JSON.stringify({ pinned: !pinned })
+    		  });
+
+    		  await loadProjects();
+    		  return;
+    		}
 
     	  if (editBtn) {
     	    const id = editBtn.dataset.id;
