@@ -259,6 +259,9 @@
 	              <button class="btn btn-toggle" data-id="${p.id}" data-public="${p.isPublic}">
 	                ${p.isPublic ? "비공개" : "공개"}
 	              </button>
+	              <button class="btn btn-pin" data-id="${p.id}" data-pinned="${p.pinned}">
+		            ${p.pinned ? "고정해제" : "상단고정"}
+		          </button>
 	              <button class="btn danger btn-delete" data-id="${p.id}">삭제</button>
 	            </div>
 	          </td>	
@@ -273,6 +276,19 @@
     	  const editBtn = e.target.closest(".btn-edit");
     	  const toggleBtn = e.target.closest(".btn-toggle");
     	  const deleteBtn = e.target.closest(".btn-delete");
+    	  const pinBtn = e.target.closest(".btn-pin");
+    	  if (pinBtn) {
+    	    const id = pinBtn.dataset.id;
+    	    const pinned = pinBtn.dataset.pinned === "true";
+
+    	    await fetch(`/api/admin/projects/${id}/pin`, {
+    	      method: "PATCH",
+    	      headers: { "Content-Type": "application/json" },
+    	      body: JSON.stringify({ pinned: !pinned })
+    	    });
+
+    	    await loadProjects();
+    	  }
 
     	  if (editBtn) {
     	    const id = editBtn.dataset.id;

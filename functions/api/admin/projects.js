@@ -9,7 +9,7 @@ export const onRequestGet = async ({ env }) => {
   const rows = await env.DB.prepare(
     `SELECT id, title, description, is_public, created_at, updated_at
      FROM projects
-     ORDER BY id DESC`
+     ORDER BY pinned DESC, pinned_at DESC, id DESC`
   ).all();
 
   const projects = (rows.results || []).map((r) => ({
@@ -19,6 +19,8 @@ export const onRequestGet = async ({ env }) => {
     isPublic: !!r.is_public,
     createdAt: r.created_at,
     updatedAt: r.updated_at,
+    pinned: !!r.pinned,
+    pinnedAt: r.pinned_at,
   }));
 
   return json({ ok: true, projects });
