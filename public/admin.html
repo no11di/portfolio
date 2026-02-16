@@ -63,6 +63,7 @@
             <th>제목</th>
             <th style="width:110px;">공개</th>
             <th style="width:180px;">생성</th>
+            <th style="width:220px;">관리</th>
           </tr>
         </thead>
         <tbody id="tbody"></tbody>
@@ -204,6 +205,15 @@
             <td>${escapeHtml(p.title)}</td>
             <td>${badge}</td>
             <td class="mono">${escapeHtml(p.createdAt || "")}</td>
+            <td>
+	            <div class="row">
+	              <button class="btn btn-edit" data-id="${p.id}">수정</button>
+	              <button class="btn btn-toggle" data-id="${p.id}" data-public="${p.isPublic}">
+	                ${p.isPublic ? "비공개" : "공개"}
+	              </button>
+	              <button class="btn danger btn-delete" data-id="${p.id}">삭제</button>
+	            </div>
+	          </td>	
           </tr>
         `;
       }).join("");
@@ -211,6 +221,53 @@
 
     btnReload.addEventListener("click", loadProjects);
     loadProjects();
+    document.addEventListener("click", async (e) => {
+    	  const editBtn = e.target.closest(".btn-edit");
+    	  const toggleBtn = e.target.closest(".btn-toggle");
+    	  const deleteBtn = e.target.closest(".btn-delete");
+
+    	  if (editBtn) {
+    	    const id = editBtn.dataset.id;
+    	    const row = editBtn.closest("tr");
+    	    const title = row.children[1].innerText;
+
+    	    const newTitle = prompt("제목 수정", title);
+    	    if (!newTitle) return;
+
+    	    await fetch(`/api/admin/projects/${id}`, {
+    	      method: "PATCH",
+    	      headers: { "Content-Type": "application/json" },
+    	      body: JSON.stringify({ title: newTitle, description: "" })
+    	    });
+
+    	    await loadProjects();
+    	  }
+
+    	  if (toggleBtn) {
+    	    const id = toggleBtn.dataset.id;
+    	    const isPublic = toggleBtn.dataset.public === "true";
+
+    	    await fetch(`/api/admin/projects/${id}/visibility`, {
+    	      method: "PATCH",
+    	      headers: { "Content-Type": "application/json" },
+    	      body: JSON.stringify({ isPublic: !isPublic })
+    	    });
+
+    	    await loadProjects();
+    	  }
+
+    	  if (deleteBtn) {
+    	    const id = deleteBtn.dataset.id;
+    	    if (!confirm("정말 삭제하시겠습니까?")) return;
+
+    	    await fetch(`/api/admin/projects/${id}`, {
+    	      method: "DELETE"
+    	    });
+
+    	    await loadProjects();
+    	  }
+    	});
+
   </script>
 </body>
 </html>
