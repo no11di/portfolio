@@ -381,9 +381,7 @@
     	  const pinBtn = e.target.closest(".btn-pin");
     	  if (pinBtn) {
     	    const id = pinBtn.dataset.id;
-    	    const pinnedRaw = pinBtn.dataset.pinned;
-    	    const pinned = (pinnedRaw === "true" || pinnedRaw === "1");
-
+    	    const pinned = pinBtn.dataset.pinned === "true";
 
     	    await fetch(`/api/admin/projects/${id}/pin`, {
     	      method: "PATCH",
