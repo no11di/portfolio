@@ -73,3 +73,41 @@ export const onRequestDelete = async ({ env, params }) => {
 
   return json({ ok: true, deletedImages: keys.length });
 };
+export const onRequestGet = async ({ env, params }) => {
+	  const id = Number(params?.id);
+	  if (!Number.isInteger(id) || id <= 0) {
+	    return new Response(JSON.stringify({ ok:false, message:"유효하지 않은 id" }), {
+	      status: 400,
+	      headers: { "content-type":"application/json; charset=utf-8" }
+	    });
+	  }
+
+	  const row = await env.DB.prepare(
+	    `SELECT id, title, description, is_public, pinned, pinned_at, created_at, updated_at
+	     FROM projects
+	     WHERE id = ?`
+	  ).bind(id).first();
+
+	  if (!row) {
+	    return new Response(JSON.stringify({ ok:false, message:"대상이 없습니다." }), {
+	      status: 404,
+	      headers: { "content-type":"application/json; charset=utf-8" }
+	    });
+	  }
+
+	  return new Response(JSON.stringify({
+	    ok: true,
+	    project: {
+	      id: row.id,
+	      title: row.title,
+	      description: row.description || "",
+	      isPublic: !!row.is_public,
+	      pinned: !!row.pinned,
+	      pinnedAt: row.pinned_at,
+	      createdAt: row.created_at,
+	      updatedAt: row.updated_at
+	    }
+	  }), {
+	    headers: { "content-type":"application/json; charset=utf-8" }
+	  });
+	};
