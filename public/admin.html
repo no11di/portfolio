@@ -182,33 +182,101 @@
     	  const next = !currentlyPinned;
 
     	  projActionStatus.textContent = "고정 상태 변경 중...";
-    	  btnProjTogglePin.disabled = true;
+    	// 공개/비공개 토글
+    	  btnProjTogglePublic.addEventListener("click", async () => {
+    	    if (!currentProject) return;
 
-    	  try {
-    	    const res = await fetch(`/api/admin/projects/${currentProject.id}/pin`, {
-    	      method: "PATCH",
-    	      headers: { "Content-Type": "application/json" },
-    	      body: JSON.stringify({ pinned: next })
-    	    });
+    	    const next = !currentProject.isPublic;
+    	    projActionStatus.textContent = "공개 상태 변경 중...";
+    	    btnProjTogglePublic.disabled = true;
 
-    	    const data = await res.json().catch(()=>null);
-    	    if (!res.ok || !data?.ok) {
-    	      projActionStatus.textContent = `변경 실패 (HTTP ${res.status})`;
+    	    try {
+    	      const res = await fetch(`/api/admin/projects/${currentProject.id}/visibility`, {
+    	        method: "PATCH",
+    	        headers: { "Content-Type": "application/json" },
+    	        body: JSON.stringify({ isPublic: next }),
+    	      });
+    	      const data = await res.json().catch(() => null);
+    	      if (!res.ok || !data?.ok) {
+    	        projActionStatus.textContent = `변경 실패 (HTTP ${res.status})`;
+    	        return;
+    	      }
+
+    	      currentProject.isPublic = next;
+    	      refreshProjectButtons();
+    	      projMeta.textContent =
+    	        `ID ${currentProject.id} · ${currentProject.isPublic ? "공개" : "비공개"} · ${currentProject.pinned ? "상단고정" : "일반"}`;
+    	      projActionStatus.textContent = next ? "공개로 전환됨" : "비공개로 전환됨";
+
+    	      await loadProjects();
+    	    } finally {
+    	      btnProjTogglePublic.disabled = false;
+    	    }
+    	  });
+
+    	  // 저장(제목/설명 수정)
+    	  btnProjSave.addEventListener("click", async () => {
+    	    if (!currentProject) return;
+
+    	    const title = (projTitleInput.value || "").trim();
+    	    const description = (projDescInput.value || "").toString();
+
+    	    if (!title) {
+    	      projActionStatus.textContent = "제목은 필수입니다.";
     	      return;
     	    }
 
-    	    // ✅ 로컬 상태도 next로 확정
-    	    currentProject.pinned = next;
-    	    refreshProjectButtons();
-    	    projMeta.textContent =
-    	      `ID ${currentProject.id} · ${currentProject.isPublic ? "공개" : "비공개"} · ${currentProject.pinned ? "상단고정" : "일반"}`;
-    	    projActionStatus.textContent = next ? "상단 고정됨" : "고정 해제됨";
+    	    projActionStatus.textContent = "저장 중...";
+    	    btnProjSave.disabled = true;
 
-    	    await loadProjects();
-    	  } finally {
-    	    btnProjTogglePin.disabled = false;
-    	  }
-    	});
+    	    try {
+    	      const res = await fetch(`/api/admin/projects/${currentProject.id}`, {
+    	        method: "PATCH",
+    	        headers: { "Content-Type": "application/json" },
+    	        body: JSON.stringify({ title, description }),
+    	      });
+    	      const data = await res.json().catch(() => null);
+    	      if (!res.ok || !data?.ok) {
+    	        projActionStatus.textContent = `저장 실패 (HTTP ${res.status})`;
+    	        return;
+    	      }
+
+    	      currentProject.title = title;
+    	      currentProject.description = description;
+
+    	      projActionStatus.textContent = "저장 완료";
+    	      await loadProjects();
+    	    } finally {
+    	      btnProjSave.disabled = false;
+    	    }
+    	  });
+
+    	  // 삭제(프로젝트 + 이미지도 함께 삭제)
+    	  btnProjDelete.addEventListener("click", async () => {
+    	    if (!currentProject) return;
+    	    if (!confirm("정말 삭제하시겠습니까? (이미지도 함께 삭제됩니다)")) return;
+
+    	    projActionStatus.textContent = "삭제 중...";
+    	    btnProjDelete.disabled = true;
+
+    	    try {
+    	      const res = await fetch(`/api/admin/projects/${currentProject.id}`, {
+    	        method: "DELETE",
+    	      });
+    	      const data = await res.json().catch(() => null);
+    	      if (!res.ok || !data?.ok) {
+    	        projActionStatus.textContent = `삭제 실패 (HTTP ${res.status})`;
+    	        return;
+    	      }
+
+    	      projActionStatus.textContent = "삭제 완료";
+    	      closeProjModal();
+    	      await loadProjects();
+    	    } finally {
+    	      btnProjDelete.disabled = false;
+    	    }
+    	  });
+
 
 
     let currentProject = null; // {id, title, description, isPublic, pinned}

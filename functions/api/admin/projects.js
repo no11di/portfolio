@@ -13,15 +13,16 @@ export const onRequestGet = async ({ env }) => {
   ).all();
 
   const projects = (rows.results || []).map((r) => ({
-    id: r.id,
-    title: r.title,
-    description: r.description || "",
-    isPublic: !!r.is_public,
-    createdAt: r.created_at,
-    updatedAt: r.updated_at,
-    pinned: !!r.pinned,
-    pinnedAt: r.pinned_at,
-  }));
+	  id: r.id,
+	  title: r.title,
+	  description: r.description || "",
+	  isPublic: Number(r.is_public) === 1,
+	  createdAt: r.created_at,
+	  updatedAt: r.updated_at,
+	  pinned: Number(r.pinned) === 1,
+	  pinnedAt: r.pinned_at ?? null,
+	}));
+
 
   return json({ ok: true, projects });
 };
