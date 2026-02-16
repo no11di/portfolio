@@ -60,15 +60,27 @@
     const btnClose = document.getElementById("btnClose");
 
     function openModal(p) {
-      modalTitle.textContent = p.title || "";
-      modalDesc.textContent = p.description || "";
-      modalBackdrop.style.display = "flex";
-      modalBackdrop.setAttribute("aria-hidden", "false");
-    }
+    	  modalTitle.textContent = p.title || "";
+    	  modalDesc.textContent = p.description || "";
+
+    	  // 열기
+    	  modalBackdrop.style.display = "flex";
+    	  modalBackdrop.removeAttribute("aria-hidden");
+
+    	  // 닫기 버튼에 포커스 (접근성/키보드)
+    	  setTimeout(() => btnClose.focus(), 0);
+    	}
     function closeModal() {
-      modalBackdrop.style.display = "none";
-      modalBackdrop.setAttribute("aria-hidden", "true");
-    }
+    	  // 1) 모달 안에 포커스가 남아있으면 먼저 밖으로 빼기
+    	  if (modalBackdrop.contains(document.activeElement)) {
+    	    document.activeElement.blur();
+    	  }
+
+    	  // 2) 닫기
+    	  modalBackdrop.style.display = "none";
+    	  modalBackdrop.setAttribute("aria-hidden", "true");
+    	}
+
     btnClose.addEventListener("click", closeModal);
     modalBackdrop.addEventListener("click", (e) => { if (e.target === modalBackdrop) closeModal(); });
     document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
