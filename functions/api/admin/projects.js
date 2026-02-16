@@ -7,7 +7,7 @@ function json(data, status = 200) {
 
 export const onRequestGet = async ({ env }) => {
   const rows = await env.DB.prepare(
-    `SELECT id, title, description, is_public, created_at, updated_at
+    `SELECT id, title, description, is_public, pinned, pinned_at, created_at, updated_at
      FROM projects
      ORDER BY pinned DESC, pinned_at DESC, id DESC`
   ).all();
