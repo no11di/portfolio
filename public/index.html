@@ -124,7 +124,7 @@
         const id = Number(card.dataset.id);
         const p = projects.find(x => x.id === id);
         if (p) openModal(p);
-      }, { once: true });
+      });
     }
 
     loadPublicProjects();
