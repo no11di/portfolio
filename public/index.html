@@ -3,10 +3,119 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>QA Portfolio</title>
+  <title>Portfolio</title>
+  <style>
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:#0b0b0b; color:#fff; }
+    header { padding:22px 20px; border-bottom:1px solid #222; }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 20px; }
+    h1 { margin:0; font-size:20px; }
+    .muted { color:#aaa; font-size:13px; margin-top:6px; }
+
+    .grid { display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:12px; margin-top:16px; }
+    @media (min-width: 780px) { .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+    .card { background:#121212; border:1px solid #222; border-radius:14px; padding:14px; cursor:pointer; }
+    .card:hover { border-color:#333; }
+    .title { font-weight:700; font-size:15px; line-height:1.3; }
+    .desc { margin-top:8px; color:#bbb; font-size:13px; line-height:1.4; white-space:pre-wrap; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+
+    .modal-backdrop { position: fixed; inset:0; background: rgba(0,0,0,0.65); display:none; align-items:center; justify-content:center; padding:20px; }
+    .modal { width:min(820px, 100%); background:#111; border:1px solid #2a2a2a; border-radius:14px; padding:16px; }
+    .modal h2 { margin:0 0 10px; font-size:16px; }
+    .modal .content { color:#ddd; font-size:14px; line-height:1.6; white-space:pre-wrap; }
+    .row { display:flex; gap:10px; justify-content:flex-end; margin-top:14px; }
+    .btn { background:#1f1f1f; color:#fff; border:1px solid #333; padding:10px 12px; border-radius:10px; cursor:pointer; }
+  </style>
 </head>
 <body>
-  <h1>배포 테스트 성공</h1>
-  <p>이 화면이 Cloudflare Pages에서 보이면 3단계 완료입니다.</p>
+  <header>
+    <div class="wrap">
+      <h1>포트폴리오</h1>
+      <div class="muted">공개 프로젝트만 표시됩니다.</div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="muted" id="status">불러오는 중...</div>
+    <div class="grid" id="grid" style="display:none;"></div>
+  </main>
+
+  <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <h2 id="modalTitle"></h2>
+      <div class="content" id="modalDesc"></div>
+      <div class="row">
+        <button class="btn" id="btnClose">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const statusEl = document.getElementById("status");
+    const gridEl = document.getElementById("grid");
+
+    const modalBackdrop = document.getElementById("modalBackdrop");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalDesc = document.getElementById("modalDesc");
+    const btnClose = document.getElementById("btnClose");
+
+    function openModal(p) {
+      modalTitle.textContent = p.title || "";
+      modalDesc.textContent = p.description || "";
+      modalBackdrop.style.display = "flex";
+      modalBackdrop.setAttribute("aria-hidden", "false");
+    }
+    function closeModal() {
+      modalBackdrop.style.display = "none";
+      modalBackdrop.setAttribute("aria-hidden", "true");
+    }
+    btnClose.addEventListener("click", closeModal);
+    modalBackdrop.addEventListener("click", (e) => { if (e.target === modalBackdrop) closeModal(); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, (m) => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+      }[m]));
+    }
+
+    async function loadPublicProjects() {
+      statusEl.textContent = "불러오는 중...";
+      gridEl.style.display = "none";
+      gridEl.innerHTML = "";
+
+      const res = await fetch("/api/projects");
+      if (!res.ok) {
+        statusEl.textContent = `불러오기 실패 (HTTP ${res.status})`;
+        return;
+      }
+      const data = await res.json();
+      const projects = data.projects || [];
+
+      if (projects.length === 0) {
+        statusEl.textContent = "공개 프로젝트가 없습니다.";
+        return;
+      }
+
+      statusEl.textContent = "";
+      gridEl.style.display = "";
+      gridEl.innerHTML = projects.map(p => `
+        <div class="card" data-id="${p.id}">
+          <div class="title">${escapeHtml(p.title)}</div>
+          <div class="desc">${escapeHtml(p.description || "")}</div>
+        </div>
+      `).join("");
+
+      gridEl.addEventListener("click", (e) => {
+        const card = e.target.closest(".card");
+        if (!card) return;
+        const id = Number(card.dataset.id);
+        const p = projects.find(x => x.id === id);
+        if (p) openModal(p);
+      }, { once: true });
+    }
+
+    loadPublicProjects();
+  </script>
 </body>
 </html>
