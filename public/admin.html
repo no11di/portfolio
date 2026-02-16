@@ -176,7 +176,11 @@
     btnProjTogglePin.addEventListener("click", async () => {
     	  if (!currentProject) return;
 
-    	  const next = !currentProject.pinned;
+    	  // ✅ 현재 버튼 텍스트로 "지금 상태"를 판단
+    	  // 버튼이 "고정해제"면 현재 pinned=true, "상단고정"이면 pinned=false
+    	  const currentlyPinned = btnProjTogglePin.textContent.includes("고정해제");
+    	  const next = !currentlyPinned;
+
     	  projActionStatus.textContent = "고정 상태 변경 중...";
     	  btnProjTogglePin.disabled = true;
 
@@ -193,12 +197,14 @@
     	      return;
     	    }
 
-    	    currentProject.pinned = next;        // ⭐ 상태 업데이트
-    	    refreshProjectButtons();              // ⭐ 버튼명 갱신
-    	    projMeta.textContent = `ID ${currentProject.id} · ${currentProject.isPublic ? "공개" : "비공개"} · ${currentProject.pinned ? "상단고정" : "일반"}`;
+    	    // ✅ 로컬 상태도 next로 확정
+    	    currentProject.pinned = next;
+    	    refreshProjectButtons();
+    	    projMeta.textContent =
+    	      `ID ${currentProject.id} · ${currentProject.isPublic ? "공개" : "비공개"} · ${currentProject.pinned ? "상단고정" : "일반"}`;
     	    projActionStatus.textContent = next ? "상단 고정됨" : "고정 해제됨";
 
-    	    await loadProjects(); // 목록 순서도 즉시 반영
+    	    await loadProjects();
     	  } finally {
     	    btnProjTogglePin.disabled = false;
     	  }
