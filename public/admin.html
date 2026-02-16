@@ -80,29 +80,6 @@
       </table>
     </div>
   </main>
-  <div class="modal-backdrop" id="projModalBackdrop" aria-hidden="true">
-	  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="projModalTitle">
-	    <h2 id="projModalTitle">프로젝트</h2>
-	
-	    <div class="muted" id="projMeta" style="margin-top:6px;"></div>
-	
-	    <div class="field" style="margin-top:12px;">
-	      <label>설명</label>
-	      <div class="textarea" id="projDescView" style="min-height:120px;"></div>
-	    </div>
-	
-	    <div class="field" style="margin-top:12px;">
-	      <label>이미지(1~3)</label>
-	      <div id="projImages" class="row" style="gap:10px; flex-direction:column;"></div>
-	      <div class="muted" id="projImgStatus" style="margin-top:6px;"></div>
-	    </div>
-	
-	    <div class="modal-actions">
-	      <button class="btn" id="projModalClose">닫기</button>
-	    </div>
-	  </div>
-  </div>
-  
   <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true">
 	  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
 	    <h2 id="modalTitle">프로젝트 추가</h2>
@@ -146,81 +123,6 @@
     const imgFile = document.getElementById("imgFile");
     const btnUploadImg = document.getElementById("btnUploadImg");
     const imgStatus = document.getElementById("imgStatus");
-    const projModalBackdrop = document.getElementById("projModalBackdrop");
-    const projModalTitle = document.getElementById("projModalTitle");
-    const projMeta = document.getElementById("projMeta");
-    const projDescView = document.getElementById("projDescView");
-    const projImages = document.getElementById("projImages");
-    const projImgStatus = document.getElementById("projImgStatus");
-    const projModalClose = document.getElementById("projModalClose");
-
-    function openProjModal() {
-      projModalBackdrop.style.display = "flex";
-      projModalBackdrop.removeAttribute("aria-hidden");
-      setTimeout(() => projModalClose.focus(), 0);
-    }
-    function closeProjModal() {
-      if (projModalBackdrop.contains(document.activeElement)) document.activeElement.blur();
-      projModalBackdrop.style.display = "none";
-      projModalBackdrop.setAttribute("aria-hidden", "true");
-    }
-
-    projModalClose.addEventListener("click", closeProjModal);
-    projModalBackdrop.addEventListener("click", (e) => { if (e.target === projModalBackdrop) closeProjModal(); });
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && projModalBackdrop.style.display === "flex") closeProjModal();
-    });
-
-    async function loadProjectDetail(projectId) {
-      projModalTitle.textContent = "불러오는 중...";
-      projMeta.textContent = "";
-      projDescView.textContent = "";
-      projImages.innerHTML = "";
-      projImgStatus.textContent = "이미지 불러오는 중...";
-
-      const [pRes, iRes] = await Promise.all([
-        fetch(`/api/admin/projects/${projectId}`),
-        fetch(`/api/admin/projects/${projectId}/images-list`)
-      ]);
-
-      if (!pRes.ok) {
-        projModalTitle.textContent = `불러오기 실패 (HTTP ${pRes.status})`;
-        projImgStatus.textContent = "";
-        return;
-      }
-      const pData = await pRes.json();
-      const p = pData.project;
-
-      projModalTitle.textContent = p.title;
-      projMeta.textContent = `ID ${p.id} · ${p.isPublic ? "공개" : "비공개"} · ${p.pinned ? "상단고정" : "일반"}`;
-      projDescView.textContent = p.description || "";
-
-      if (!iRes.ok) {
-        projImgStatus.textContent = `이미지 불러오기 실패 (HTTP ${iRes.status})`;
-        return;
-      }
-      const iData = await iRes.json();
-      const images = iData.images || [];
-
-      const bySort = new Map(images.map(x => [x.sort_no, x]));
-      const lines = [1,2,3].map(n => {
-        const img = bySort.get(n);
-        return `<div class="muted">#${n} : ${img ? escapeHtml(img.object_key) : "(없음)"}</div>`;
-      }).join("");
-
-      projImages.innerHTML = lines;
-      projImgStatus.textContent = images.length ? "" : "등록된 이미지가 없습니다.";
-    }
-
-    // 제목 클릭 → 모달 열고 로드
-    document.addEventListener("click", async (e) => {
-      const titleBtn = e.target.closest(".btn-title");
-      if (!titleBtn) return;
-      const id = Number(titleBtn.dataset.id);
-      openProjModal();
-      await loadProjectDetail(id);
-    });
-
 
     btnUploadImg.addEventListener("click", async () => {
       const projectId = Number(imgProjectId.value);
@@ -348,11 +250,7 @@
         return `
           <tr>
             <td class="mono">${p.id}</td>
-            <td>
-	            <button class="btn btn-title" data-id="${p.id}" style="width:100%; text-align:left;">
-	              ${escapeHtml(p.title)}
-	            </button>
-            </td>
+            <td>${escapeHtml(p.title)}</td>
             <td>${badge}</td>
             <td class="mono">${escapeHtml(p.createdAt || "")}</td>
             <td>
