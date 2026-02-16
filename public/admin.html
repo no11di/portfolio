@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Portfolio Admin</title>
+  <style>
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:#0b0b0b; color:#fff; }
+    header { padding:16px 20px; border-bottom:1px solid #222; display:flex; align-items:center; gap:12px; }
+    header h1 { font-size:16px; margin:0; }
+    main { padding:20px; max-width: 980px; margin:0 auto; }
+    .card { background:#121212; border:1px solid #222; border-radius:12px; padding:16px; }
+    .row { display:flex; gap:12px; flex-wrap:wrap; }
+    .btn { background:#1f1f1f; color:#fff; border:1px solid #333; padding:10px 12px; border-radius:10px; cursor:pointer; }
+    .btn:disabled { opacity:0.5; cursor:not-allowed; }
+    .muted { color:#aaa; font-size:13px; }
+    table { width:100%; border-collapse: collapse; margin-top:12px; }
+    th, td { border-bottom:1px solid #222; padding:10px 8px; text-align:left; vertical-align:top; }
+    th { color:#bbb; font-weight:600; font-size:13px; }
+    td { font-size:14px; }
+    .badge { display:inline-block; padding:2px 8px; border-radius:999px; border:1px solid #333; font-size:12px; }
+    .badge.public { background: rgba(0, 200, 120, 0.15); }
+    .badge.private { background: rgba(255, 180, 0, 0.15); }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
+    .right { text-align:right; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>관리자</h1>
+    <span class="muted">프로젝트 목록</span>
+  </header>
+
+  <main>
+    <div class="card">
+      <div class="row" style="justify-content:space-between; align-items:center;">
+        <div>
+          <div class="muted">API</div>
+          <div class="mono" id="apiBase"></div>
+        </div>
+        <div class="row">
+          <button class="btn" id="btnReload">새로고침</button>
+        </div>
+      </div>
+
+      <div id="status" class="muted" style="margin-top:12px;">불러오는 중...</div>
+
+      <table id="tbl" style="display:none;">
+        <thead>
+          <tr>
+            <th style="width:70px;">ID</th>
+            <th>제목</th>
+            <th style="width:110px;">공개</th>
+            <th style="width:180px;">생성</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <script>
+    const API_BASE = location.origin; // 같은 도메인
+    document.getElementById("apiBase").textContent = API_BASE;
+
+    const statusEl = document.getElementById("status");
+    const tbl = document.getElementById("tbl");
+    const tbody = document.getElementById("tbody");
+    const btnReload = document.getElementById("btnReload");
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, (m) => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+      }[m]));
+    }
+
+    async function loadProjects() {
+      statusEl.textContent = "불러오는 중...";
+      tbl.style.display = "none";
+      tbody.innerHTML = "";
+
+      const res = await fetch(`${API_BASE}/api/admin/projects`, { method: "GET" });
+      if (!res.ok) {
+        statusEl.textContent = `불러오기 실패 (HTTP ${res.status})`;
+        return;
+      }
+      const data = await res.json();
+      const projects = data.projects || [];
+
+      if (projects.length === 0) {
+        statusEl.textContent = "등록된 프로젝트가 없습니다.";
+        return;
+      }
+
+      statusEl.textContent = `총 ${projects.length}개`;
+      tbl.style.display = "";
+      tbody.innerHTML = projects.map(p => {
+        const badge = p.isPublic
+          ? `<span class="badge public">공개</span>`
+          : `<span class="badge private">비공개</span>`;
+        return `
+          <tr>
+            <td class="mono">${p.id}</td>
+            <td>${escapeHtml(p.title)}</td>
+            <td>${badge}</td>
+            <td class="mono">${escapeHtml(p.createdAt || "")}</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    btnReload.addEventListener("click", loadProjects);
+    loadProjects();
+  </script>
+</body>
+</html>
