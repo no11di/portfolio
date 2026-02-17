@@ -3,131 +3,593 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Portfolio</title>
+  <title>QA Engineer Portfolio</title>
   <style>
-    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:#0b0b0b; color:#fff; }
-    header { padding:22px 20px; border-bottom:1px solid #222; }
-    .wrap { max-width: 980px; margin: 0 auto; padding: 20px; }
-    h1 { margin:0; font-size:20px; }
-    .muted { color:#aaa; font-size:13px; margin-top:6px; }
+    :root{
+      --bg:#ffffff;
+      --text:#111;
+      --muted:#666;
+      --line:#e9e9e9;
+      --card:#fff;
+      --shadow: 0 10px 30px rgba(0,0,0,.06);
+      --radius:14px;
+      --max: 1040px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:var(--bg); color:var(--text);}
+    a{color:inherit}
+    .wrap{max-width:var(--max); margin:0 auto; padding:0 18px;}
+    header{position:sticky; top:0; z-index:5; background:rgba(255,255,255,.8); backdrop-filter: blur(8px); border-bottom:1px solid var(--line);}
+    .topbar{display:flex; align-items:center; justify-content:space-between; padding:10px 0;}
+    .brand{font-weight:800}
+    .nav{display:flex; gap:12px; align-items:center; color:var(--muted); font-size:14px;}
+    .nav a{padding:8px 10px; border-radius:10px; text-decoration:none}
+    .nav a:hover{background:#f5f5f5}
 
-    .grid { display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:12px; margin-top:16px; }
-    @media (min-width: 780px) { .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+    /* HERO */
+    .hero{padding:18px 0 8px}
+    .banner{
+      width:100%;
+      height: 220px;
+      border-radius: 18px;
+      overflow:hidden;
+      border:1px solid var(--line);
+      background:#f5f5f5;
+      position:relative;
+    }
+    .banner img{width:100%; height:100%; object-fit:cover; display:block;}
+    .heroGrid{display:grid; grid-template-columns: 1.5fr .8fr; gap:18px; margin-top:16px;}
+    .title{font-size:34px; font-weight:900; margin:0 0 8px}
+    .tagline{font-size:18px; font-weight:700; margin:0 0 10px}
+    .greeting{margin:0; color:var(--muted); line-height:1.6; white-space:pre-wrap;}
 
-    .card { background:#121212; border:1px solid #222; border-radius:14px; padding:14px; cursor:pointer; }
-    .card:hover { border-color:#333; }
-    .title { font-weight:700; font-size:15px; line-height:1.3; }
-    .desc { margin-top:8px; color:#bbb; font-size:13px; line-height:1.4; white-space:pre-wrap; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+    .sideCard{
+      border:1px solid var(--line);
+      border-radius: 16px;
+      background:var(--card);
+      padding:14px;
+      box-shadow: var(--shadow);
+      height:fit-content;
+    }
+    .portraitRow{display:flex; gap:14px; align-items:center;}
+    .portrait{
+      width:92px; height:92px; border-radius: 999px;
+      border:1px solid var(--line);
+      overflow:hidden; background:#f2f2f2;
+      flex:0 0 auto;
+    }
+    .portrait img{width:100%; height:100%; object-fit:cover; display:block;}
+    .sideTitle{font-weight:800; margin:0}
+    .sideSub{color:var(--muted); font-size:13px; margin-top:4px; line-height:1.4}
 
-    .modal-backdrop { position: fixed; inset:0; background: rgba(0,0,0,0.65); display:none; align-items:center; justify-content:center; padding:20px; }
-    .modal { width:min(820px, 100%); background:#111; border:1px solid #2a2a2a; border-radius:14px; padding:16px; }
-    .modal h2 { margin:0 0 10px; font-size:16px; }
-    .modal .content { color:#ddd; font-size:14px; line-height:1.6; white-space:pre-wrap; }
-    .row { display:flex; gap:10px; justify-content:flex-end; margin-top:14px; }
-    .btn { background:#1f1f1f; color:#fff; border:1px solid #333; padding:10px 12px; border-radius:10px; cursor:pointer; }
+    /* SECTION */
+    section{padding:26px 0;}
+    .sectionHead{display:flex; align-items:center; gap:8px; margin:0 0 10px;}
+    .sectionHead h2{margin:0; font-size:22px}
+    .hr{height:1px; background:var(--line); margin-top:10px}
+
+    /* Profile/Contact 2-col */
+    .twoCol{display:grid; grid-template-columns: 1fr 1fr; gap:18px; margin-top:12px;}
+    .list{margin:0; padding:0; list-style:none;}
+    .list li{padding:10px 0; border-bottom:1px solid var(--line); color:#222;}
+    .list li:last-child{border-bottom:none}
+    .list .muted{color:var(--muted); font-size:13px}
+
+    /* Career */
+    .career{margin-top:8px}
+    .careerItem{padding:6px 0; line-height:1.6}
+    .lv1{padding-left:0; font-weight:700}
+    .lv2{padding-left:18px; font-weight:600}
+    .lv3{padding-left:36px; font-weight:600; color:#333}
+
+    /* Skills */
+    .skillGrid{display:grid; grid-template-columns: repeat(3, 1fr); gap:16px; margin-top:12px;}
+    .skillCol{
+      border:1px solid var(--line);
+      border-radius: 14px;
+      background:#fff;
+      padding:12px;
+    }
+    .skillColHead{
+      display:flex; justify-content:space-between; align-items:center;
+      font-weight:800; margin-bottom:10px;
+    }
+    .pill{font-size:12px; color:#444; background:#f6f6f6; border:1px solid var(--line); padding:2px 8px; border-radius:999px;}
+    .skillItem{
+      display:flex; align-items:center; gap:10px;
+      border:1px solid var(--line);
+      border-radius: 12px;
+      padding:10px 10px;
+      cursor:pointer;
+      transition: transform .06s ease;
+      margin-top:10px;
+    }
+    .skillItem:hover{transform: translateY(-1px)}
+    .tick{
+      width:22px; height:22px; border-radius: 7px;
+      border:1px solid var(--line);
+      display:flex; align-items:center; justify-content:center;
+      background:#fafafa; font-weight:900;
+    }
+    .skillName{font-weight:800}
+    .skillSummary{color:var(--muted); font-size:13px; margin-top:2px; white-space:pre-wrap}
+
+    /* Projects */
+    .projGrid{display:grid; grid-template-columns: repeat(3, 1fr); gap:16px; margin-top:12px;}
+    .projCard{
+      border:1px solid var(--line);
+      border-radius: 16px;
+      overflow:hidden;
+      background:#fff;
+      box-shadow: var(--shadow);
+      cursor:pointer;
+    }
+    .projThumb{width:100%; height:150px; background:#f2f2f2; border-bottom:1px solid var(--line);}
+    .projThumb img{width:100%; height:100%; object-fit:cover; display:block;}
+    .projBody{padding:12px}
+    .projTitle{font-weight:900; margin:0 0 6px; font-size:15px}
+    .projDesc{margin:0; color:var(--muted); font-size:13px; line-height:1.5; white-space:pre-wrap; max-height: 3.0em; overflow:hidden;}
+
+    /* Modal */
+    .backdrop{
+      position:fixed; inset:0; background:rgba(0,0,0,.55);
+      display:none; align-items:center; justify-content:center; padding:18px;
+      z-index:20;
+    }
+    .modal{
+      width:min(920px, 100%);
+      max-height: 86vh;
+      overflow:auto;
+      background:#fff;
+      border-radius: 18px;
+      box-shadow: 0 30px 80px rgba(0,0,0,.25);
+      border:1px solid rgba(0,0,0,.08);
+    }
+    .modalHead{
+      position:sticky; top:0; background:#fff;
+      border-bottom:1px solid var(--line);
+      padding:14px 14px;
+      display:flex; justify-content:space-between; align-items:center; gap:10px;
+    }
+    .modalTitle{font-weight:900; margin:0; font-size:16px}
+    .xbtn{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius: 12px;
+      padding:8px 10px;
+      cursor:pointer;
+      font-weight:800;
+    }
+    .modalBody{padding:14px}
+    .modalText{color:#222; line-height:1.7; white-space:pre-wrap;}
+    .modalImgs{display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:12px;}
+    .modalImgs img{width:100%; border-radius: 14px; border:1px solid var(--line); display:block; background:#f2f2f2;}
+    .modalMeta{color:var(--muted); font-size:13px; margin-top:8px}
+
+    /* Responsive */
+    @media (max-width: 920px){
+      .heroGrid{grid-template-columns: 1fr; }
+      .twoCol{grid-template-columns: 1fr;}
+      .skillGrid{grid-template-columns: 1fr;}
+      .projGrid{grid-template-columns: 1fr 1fr;}
+      .banner{height: 200px;}
+    }
+    @media (max-width: 560px){
+      .title{font-size:28px}
+      .projGrid{grid-template-columns: 1fr;}
+      .banner{height: 170px;}
+      .modalImgs{grid-template-columns: 1fr;}
+    }
   </style>
 </head>
 <body>
   <header>
-    <div class="wrap">
-      <h1>포트폴리오</h1>
-      <div class="muted">공개 프로젝트만 표시됩니다.</div>
+    <div class="wrap topbar">
+      <div class="brand" id="brandTitle">포트폴리오</div>
+      <nav class="nav">
+        <a href="#profile">Profile</a>
+        <a href="#career">주요경력</a>
+        <a href="#skills">Skills</a>
+        <a href="#projects">Project</a>
+      </nav>
     </div>
   </header>
 
   <main class="wrap">
-    <div class="muted" id="status">불러오는 중...</div>
-    <div class="grid" id="grid" style="display:none;"></div>
+    <!-- HERO -->
+    <div class="hero">
+      <div class="banner" id="bannerBox">
+        <img id="bannerImg" alt="banner" style="display:none;">
+      </div>
+
+      <div class="heroGrid">
+        <div>
+          <h1 class="title" id="siteTitle">QA ENGINEER</h1>
+          <p class="tagline" id="siteTagline">테스트를 넘어 품질 구조를 고민하는 엔지니어</p>
+          <p class="greeting" id="siteGreeting"></p>
+        </div>
+
+        <aside class="sideCard">
+          <div class="portraitRow">
+            <div class="portrait">
+              <img id="portraitImg" alt="portrait" style="display:none;">
+            </div>
+            <div>
+              <p class="sideTitle">Contact</p>
+              <p class="sideSub" id="contactHint">연락처를 불러오는 중...</p>
+            </div>
+          </div>
+          <div style="margin-top:12px;">
+            <ul class="list" id="contactList"></ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <!-- Profile / Contact -->
+    <section id="profile">
+      <div class="sectionHead">
+        <h2>Profile</h2>
+      </div>
+      <div class="hr"></div>
+
+      <div class="twoCol">
+        <div>
+          <ul class="list" id="profileList"></ul>
+        </div>
+        <div class="sideCard" style="box-shadow:none;">
+          <p style="margin:0; font-weight:900;">Contact</p>
+          <p class="muted" style="margin:6px 0 0;">상단 카드와 동일 내용입니다.</p>
+          <div style="margin-top:10px;">
+            <ul class="list" id="contactList2"></ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Career -->
+    <section id="career">
+      <div class="sectionHead">
+        <h2>주요경력</h2>
+      </div>
+      <div class="hr"></div>
+
+      <div class="career" id="careerBox"></div>
+    </section>
+
+    <!-- Skills -->
+    <section id="skills">
+      <div class="sectionHead">
+        <h2>Skills</h2>
+      </div>
+      <div class="hr"></div>
+
+      <div class="skillGrid">
+        <div class="skillCol">
+          <div class="skillColHead">
+            <span>업무에도 활용해요.</span>
+            <span class="pill" id="cntLv1">0</span>
+          </div>
+          <div id="skillsLv1"></div>
+        </div>
+
+        <div class="skillCol">
+          <div class="skillColHead">
+            <span>어느 정도 사용할 줄 알아요.</span>
+            <span class="pill" id="cntLv2">0</span>
+          </div>
+          <div id="skillsLv2"></div>
+        </div>
+
+        <div class="skillCol">
+          <div class="skillColHead">
+            <span>보고 이해할 수는 있어요.</span>
+            <span class="pill" id="cntLv3">0</span>
+          </div>
+          <div id="skillsLv3"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Projects -->
+    <section id="projects">
+      <div class="sectionHead">
+        <h2>Project</h2>
+      </div>
+      <div class="hr"></div>
+
+      <div class="projGrid" id="projectGrid"></div>
+      <p class="muted" id="projectHint" style="margin-top:10px;"></p>
+    </section>
   </main>
 
-  <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true">
+  <!-- Modal -->
+  <div class="backdrop" id="backdrop" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-      <h2 id="modalTitle"></h2>
-      <div class="content" id="modalDesc"></div>
-      <div class="row">
-        <button class="btn" id="btnClose">닫기</button>
+      <div class="modalHead">
+        <div>
+          <p class="modalTitle" id="modalTitle">상세</p>
+          <div class="modalMeta" id="modalMeta"></div>
+        </div>
+        <button class="xbtn" id="btnClose">닫기</button>
+      </div>
+      <div class="modalBody">
+        <div class="modalText" id="modalText"></div>
+        <div class="modalImgs" id="modalImgs" style="display:none;"></div>
       </div>
     </div>
   </div>
 
   <script>
-    const statusEl = document.getElementById("status");
-    const gridEl = document.getElementById("grid");
-
-    const modalBackdrop = document.getElementById("modalBackdrop");
-    const modalTitle = document.getElementById("modalTitle");
-    const modalDesc = document.getElementById("modalDesc");
-    const btnClose = document.getElementById("btnClose");
-
-    function openModal(p) {
-    	  modalTitle.textContent = p.title || "";
-    	  modalDesc.textContent = p.description || "";
-
-    	  // 열기
-    	  modalBackdrop.style.display = "flex";
-    	  modalBackdrop.removeAttribute("aria-hidden");
-
-    	  // 닫기 버튼에 포커스 (접근성/키보드)
-    	  setTimeout(() => btnClose.focus(), 0);
-    	}
-    function closeModal() {
-    	  // 1) 모달 안에 포커스가 남아있으면 먼저 밖으로 빼기
-    	  if (modalBackdrop.contains(document.activeElement)) {
-    	    document.activeElement.blur();
-    	  }
-
-    	  // 2) 닫기
-    	  modalBackdrop.style.display = "none";
-    	  modalBackdrop.setAttribute("aria-hidden", "true");
-    	}
-
-    btnClose.addEventListener("click", closeModal);
-    modalBackdrop.addEventListener("click", (e) => { if (e.target === modalBackdrop) closeModal(); });
-    document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
+    const $ = (sel) => document.querySelector(sel);
 
     function escapeHtml(s) {
-      return String(s).replace(/[&<>"']/g, (m) => ({
+      return String(s ?? "").replace(/[&<>"']/g, (m) => ({
         "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
       }[m]));
     }
 
-    async function loadPublicProjects() {
-      statusEl.textContent = "불러오는 중...";
-      gridEl.style.display = "none";
-      gridEl.innerHTML = "";
-
-      const res = await fetch("/api/projects");
-      if (!res.ok) {
-        statusEl.textContent = `불러오기 실패 (HTTP ${res.status})`;
-        return;
-      }
-      const data = await res.json();
-      const projects = data.projects || [];
-
-      if (projects.length === 0) {
-        statusEl.textContent = "공개 프로젝트가 없습니다.";
-        return;
-      }
-
-      statusEl.textContent = "";
-      gridEl.style.display = "";
-      gridEl.innerHTML = projects.map(p => `
-        <div class="card" data-id="${p.id}">
-          <div class="title">${escapeHtml(p.title)}</div>
-          <div class="desc">${escapeHtml(p.description || "")}</div>
-        </div>
-      `).join("");
-
-      gridEl.addEventListener("click", (e) => {
-        const card = e.target.closest(".card");
-        if (!card) return;
-        const id = Number(card.dataset.id);
-        const p = projects.find(x => x.id === id);
-        if (p) openModal(p);
-      });
+    function mediaUrl(objectKey){
+      if (!objectKey) return "";
+      return `/api/media?key=${encodeURIComponent(objectKey)}`;
     }
 
-    loadPublicProjects();
+    // ===== Modal =====
+    const backdrop = $("#backdrop");
+    const btnClose = $("#btnClose");
+    const modalTitle = $("#modalTitle");
+    const modalText = $("#modalText");
+    const modalImgs = $("#modalImgs");
+    const modalMeta = $("#modalMeta");
+
+    function openModal({ title, text, meta, images=[] }){
+      modalTitle.textContent = title || "상세";
+      modalText.textContent = text || "";
+      modalMeta.textContent = meta || "";
+
+      if (images && images.length){
+        modalImgs.style.display = "";
+        modalImgs.innerHTML = images.map(src => `<img src="${src}" alt="img">`).join("");
+      } else {
+        modalImgs.style.display = "none";
+        modalImgs.innerHTML = "";
+      }
+
+      backdrop.style.display = "flex";
+      backdrop.removeAttribute("aria-hidden");
+      setTimeout(() => btnClose.focus(), 0);
+    }
+    function closeModal(){
+      backdrop.style.display = "none";
+      backdrop.setAttribute("aria-hidden","true");
+    }
+    btnClose.addEventListener("click", closeModal);
+    backdrop.addEventListener("click", (e)=>{ if (e.target === backdrop) closeModal(); });
+    document.addEventListener("keydown", (e)=>{ if(e.key==="Escape" && backdrop.style.display==="flex") closeModal(); });
+
+    // ===== Renderers =====
+    function renderSettings(settings){
+      const title = settings?.title || "노다솔 포트폴리오";
+      const tagline = settings?.tagline || "";
+      const greeting = settings?.greeting || "";
+
+      $("#brandTitle").textContent = title;
+      $("#siteTitle").textContent = title;
+      $("#siteTagline").textContent = tagline;
+      $("#siteGreeting").textContent = greeting;
+
+      const bKey = settings?.banner_object_key;
+      if (bKey){
+        const img = $("#bannerImg");
+        img.src = mediaUrl(bKey);
+        img.style.display = "";
+      }
+
+      const pKey = settings?.portrait_object_key;
+      if (pKey){
+        const img = $("#portraitImg");
+        img.src = mediaUrl(pKey);
+        img.style.display = "";
+      }
+    }
+
+    function renderProfile(items){
+      const box = $("#profileList");
+      if (!items || !items.length){
+        box.innerHTML = `<li class="muted">등록된 Profile 항목이 없습니다.</li>`;
+        return;
+      }
+      box.innerHTML = items.map(x => `<li>${escapeHtml(x.text)}</li>`).join("");
+    }
+
+    function renderContacts(items){
+      const hint = $("#contactHint");
+      const box1 = $("#contactList");
+      const box2 = $("#contactList2");
+
+      if (!items || !items.length){
+        hint.textContent = "등록된 Contact 항목이 없습니다.";
+        box1.innerHTML = `<li class="muted">등록된 Contact 항목이 없습니다.</li>`;
+        box2.innerHTML = box1.innerHTML;
+        return;
+      }
+      hint.textContent = "연락처";
+
+      const html = items.map(x => {
+        const label = escapeHtml(x.label);
+        const value = escapeHtml(x.value);
+
+        // 링크처럼 보이게(값이 URL/메일이면 자연스럽게)
+        let href = null;
+        if (value.startsWith("http://") || value.startsWith("https://")) href = value;
+        if (value.includes("@")) href = `mailto:${value}`;
+        if (/^\+?\d[\d -]+$/.test(value)) href = `tel:${value.replace(/[^+\d]/g,'')}`;
+
+        const right = href
+          ? `<a href="${href}" target="_blank" rel="noreferrer" style="text-decoration:none; color:#111; font-weight:700;">${value}</a>`
+          : `<span style="font-weight:700;">${value}</span>`;
+
+        return `<li><span class="muted" style="display:inline-block; width:90px;">${label}</span> ${right}</li>`;
+      }).join("");
+
+      box1.innerHTML = html;
+      box2.innerHTML = html;
+    }
+
+    function renderCareers(items){
+      const box = $("#careerBox");
+      if (!items || !items.length){
+        box.innerHTML = `<div class="muted">등록된 주요경력이 없습니다.</div>`;
+        return;
+      }
+      box.innerHTML = items.map(x => {
+        const lv = Number(x.level || 1);
+        const cls = lv === 1 ? "lv1" : (lv === 2 ? "lv2" : "lv3");
+        return `<div class="careerItem ${cls}">${escapeHtml(x.text)}</div>`;
+      }).join("");
+    }
+
+    function skillCard(s){
+      const name = escapeHtml(s.name);
+      const summary = escapeHtml(s.summary || "");
+      return `
+        <div class="skillItem" data-kind="skill" data-id="${s.id}">
+          <div class="tick">✓</div>
+          <div>
+            <div class="skillName">${name}</div>
+            ${summary ? `<div class="skillSummary">${summary}</div>` : ``}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderSkills(items){
+      const lv1 = items.filter(x => Number(x.level) === 1);
+      const lv2 = items.filter(x => Number(x.level) === 2);
+      const lv3 = items.filter(x => Number(x.level) === 3);
+
+      $("#cntLv1").textContent = lv1.length;
+      $("#cntLv2").textContent = lv2.length;
+      $("#cntLv3").textContent = lv3.length;
+
+      $("#skillsLv1").innerHTML = lv1.length ? lv1.map(skillCard).join("") : `<div class="muted">비어있음</div>`;
+      $("#skillsLv2").innerHTML = lv2.length ? lv2.map(skillCard).join("") : `<div class="muted">비어있음</div>`;
+      $("#skillsLv3").innerHTML = lv3.length ? lv3.map(skillCard).join("") : `<div class="muted">비어있음</div>`;
+
+      // 클릭용 데이터 캐시
+      window.__skills = new Map(items.map(x => [Number(x.id), x]));
+    }
+
+    // ===== Projects (public) =====
+    // 일단 /api/projects 를 호출합니다.
+    // 응답 형태가 다르면 다음 단계에서 그 스키마에 맞춰 렌더링/모달을 딱 맞춥니다.
+    async function loadProjectsPublic(){
+      const grid = $("#projectGrid");
+      const hint = $("#projectHint");
+      grid.innerHTML = "";
+      hint.textContent = "";
+
+      let res;
+      try{
+        res = await fetch("/api/projects", { method:"GET" });
+      }catch(e){
+        hint.textContent = "프로젝트를 불러오지 못했습니다. (/api/projects 연결 필요)";
+        return;
+      }
+      if (!res.ok){
+        hint.textContent = `프로젝트를 불러오지 못했습니다. (HTTP ${res.status})`;
+        return;
+      }
+
+      const data = await res.json().catch(()=>null);
+      const projects = data?.projects || data?.data || data || [];
+
+      if (!Array.isArray(projects) || projects.length === 0){
+        hint.textContent = "등록된 프로젝트가 없습니다.";
+        return;
+      }
+
+      // 캐시
+      window.__projects = new Map(projects.map(p => [Number(p.id), p]));
+
+      grid.innerHTML = projects.map(p => {
+        const title = escapeHtml(p.title || "");
+        const desc = escapeHtml(p.description || "");
+        // 대표 이미지: p.thumbnail 또는 p.images[0] 또는 p.banner_object_key 등 다양한 케이스 대비
+        const thumbKey = p.thumbnail_object_key || p.thumbnail || p.banner_object_key || null;
+        const thumbUrl = thumbKey ? mediaUrl(thumbKey) : "";
+
+        return `
+          <div class="projCard" data-kind="project" data-id="${p.id}">
+            <div class="projThumb">
+              ${thumbUrl ? `<img src="${thumbUrl}" alt="thumb">` : ``}
+            </div>
+            <div class="projBody">
+              <p class="projTitle">${title}</p>
+              <p class="projDesc">${desc}</p>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    // ===== Boot =====
+    async function boot(){
+      // 1) site 전체 로드
+      const res = await fetch("/api/site");
+      const data = await res.json().catch(()=>null);
+
+      if (!res.ok || !data?.ok){
+        $("#siteGreeting").textContent = "데이터를 불러오지 못했습니다.";
+        return;
+      }
+
+      renderSettings(data.settings);
+      renderProfile(data.profile || []);
+      renderContacts(data.contacts || []);
+      renderCareers(data.careers || []);
+      renderSkills(data.skills || []);
+
+      // 2) 프로젝트(공개) 로드
+      await loadProjectsPublic();
+    }
+
+    // 단일 클릭 핸들러(중복 등록/confirm 2번 방지 원칙)
+    document.addEventListener("click", (e) => {
+      const skill = e.target.closest('[data-kind="skill"]');
+      if (skill){
+        const id = Number(skill.dataset.id);
+        const s = window.__skills?.get(id);
+        if (!s) return;
+
+        const levelText = (Number(s.level)===1) ? "업무에도 활용해요." :
+                          (Number(s.level)===2) ? "어느 정도 사용할 줄 알아요." :
+                          "보고 이해할 수는 있어요.";
+
+        openModal({
+          title: s.name || "Skill",
+          meta: levelText,
+          text: (s.detail || s.summary || "").toString()
+        });
+        return;
+      }
+
+      const proj = e.target.closest('[data-kind="project"]');
+      if (proj){
+        const id = Number(proj.dataset.id);
+        const p = window.__projects?.get(id);
+        if (!p) return;
+
+        openModal({
+          title: p.title || "Project",
+          meta: "",
+          text: (p.description || "").toString()
+        });
+        return;
+      }
+    });
+
+    boot();
   </script>
 </body>
 </html>
