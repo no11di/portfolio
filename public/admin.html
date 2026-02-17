@@ -33,6 +33,15 @@
     .modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:14px; }
     .btn.primary { background:#ffffff; color:#000; border-color:#fff; }
     .btn.danger { border-color:#7a2c2c; }
+    .slot-card { border:1px solid #222; border-radius:12px; padding:12px; background:#0f0f0f; }
+	.slot-head { display:flex; justify-content:space-between; align-items:center; gap:10px; }
+	.slot-title { font-weight:600; }
+	.slot-preview { margin-top:10px; border:1px solid #222; border-radius:10px; overflow:hidden; background:#080808; }
+	.slot-preview img { width:100%; display:block; }
+	.slot-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; align-items:center; }
+	.slot-actions input[type="file"] { flex:1; }
+	.slot-caption { width:100%; }
+	    
   </style>
 </head>
 <body>
@@ -109,26 +118,14 @@
       </div>
 
       <div class="field" style="margin-top:12px;">
-      <label>이미지(1~3)</label>
-	
-	  <!-- 현재 등록된 이미지 표시 -->
-      <div id="projImages" class="row" style="gap:10px; flex-direction:column;"></div>
-      <div class="muted" id="projImgStatus" style="margin-top:6px;"></div>
-	
-	  <!-- 업로드/삭제 UI -->
-	  <div class="row" style="margin-top:12px; align-items:center;">
-	    <select class="input" id="projImgSlot" style="width:140px;">
-	      <option value="1">슬롯 1</option>
-	      <option value="2">슬롯 2</option>
-	      <option value="3">슬롯 3</option>
-	    </select>
-	    <input class="input" id="projImgFile" type="file" accept="image/*" style="flex:1;" />
-	    <button class="btn primary" id="btnProjImgUpload">업로드</button>
-	    <button class="btn danger" id="btnProjImgDelete">삭제</button>
-	  </div>
-	
-	  <div class="muted" id="projImgActionStatus" style="margin-top:8px;"></div>
-	</div>
+        <label>이미지(1~3)</label>
+
+        <div id="projImages" style="display:flex; flex-direction:column; gap:12px;">
+    <!-- JS가 슬롯 1~3을 렌더링 -->
+        </div>
+
+        <div class="muted" id="projImgStatus" style="margin-top:6px;"></div>
+      </div>
 
 
       <div class="modal-actions">
@@ -160,606 +157,762 @@
       <div class="muted" id="modalStatus" style="margin-top:10px;"></div>
     </div>
   </div>
-<script>
-  const API_BASE = location.origin; // 같은 도메인
-  document.getElementById("apiBase").textContent = API_BASE;
 
-  const statusEl = document.getElementById("status");
-  const tbl = document.getElementById("tbl");
-  const tbody = document.getElementById("tbody");
-  const btnReload = document.getElementById("btnReload");
-  const btnAdd = document.getElementById("btnAdd");
+  <script>
+    const API_BASE = location.origin; // 같은 도메인
+    document.getElementById("apiBase").textContent = API_BASE;
 
-  const modalBackdrop = document.getElementById("modalBackdrop");
-  const inpTitle = document.getElementById("inpTitle");
-  const inpDesc = document.getElementById("inpDesc");
-  const btnCancel = document.getElementById("btnCancel");
-  const btnSave = document.getElementById("btnSave");
-  const modalStatus = document.getElementById("modalStatus");
+    const statusEl = document.getElementById("status");
+    const tbl = document.getElementById("tbl");
+    const tbody = document.getElementById("tbody");
+    const btnReload = document.getElementById("btnReload");
+    const btnAdd = document.getElementById("btnAdd");
 
-  // (임시) 이미지 업로드 테스트 UI
-  const imgProjectId = document.getElementById("imgProjectId");
-  const imgSortNo = document.getElementById("imgSortNo");
-  const imgFile = document.getElementById("imgFile");
-  const btnUploadImg = document.getElementById("btnUploadImg");
-  const imgStatus = document.getElementById("imgStatus");
+    const modalBackdrop = document.getElementById("modalBackdrop");
+    const inpTitle = document.getElementById("inpTitle");
+    const inpDesc = document.getElementById("inpDesc");
+    const btnCancel = document.getElementById("btnCancel");
+    const btnSave = document.getElementById("btnSave");
+    const modalStatus = document.getElementById("modalStatus");
 
-  // 프로젝트 편집 모달
-  const projModalBackdrop = document.getElementById("projModalBackdrop");
-  const projModalTitle = document.getElementById("projModalTitle"); // HTML에 없을 수도 있음(그래도 안전하게)
-  const projMeta = document.getElementById("projMeta");
-  const projImages = document.getElementById("projImages");
-  const projImgStatus = document.getElementById("projImgStatus");
-  const projModalClose = document.getElementById("projModalClose");
+    const imgProjectId = document.getElementById("imgProjectId");
+    const imgSortNo = document.getElementById("imgSortNo");
+    const imgFile = document.getElementById("imgFile");
+    const btnUploadImg = document.getElementById("btnUploadImg");
+    const imgStatus = document.getElementById("imgStatus");
 
-  const projTitleInput = document.getElementById("projTitleInput");
-  const projDescInput = document.getElementById("projDescInput");
-  const btnProjTogglePublic = document.getElementById("btnProjTogglePublic");
-  const btnProjTogglePin = document.getElementById("btnProjTogglePin");
-  const btnProjSave = document.getElementById("btnProjSave");
-  const btnProjDelete = document.getElementById("btnProjDelete");
-  const projActionStatus = document.getElementById("projActionStatus");
+    const projModalBackdrop = document.getElementById("projModalBackdrop");
+    const projModalTitle = document.getElementById("projModalTitle");
+    const projMeta = document.getElementById("projMeta");
+    const projImages = document.getElementById("projImages");
+    const projImgStatus = document.getElementById("projImgStatus");
+    const projModalClose = document.getElementById("projModalClose");
 
-  // 모달 내 이미지 슬롯 업로드/삭제 UI
-  const projImgSlot = document.getElementById("projImgSlot");
-  const projImgFile = document.getElementById("projImgFile");
-  const btnProjImgUpload = document.getElementById("btnProjImgUpload");
-  const btnProjImgDelete = document.getElementById("btnProjImgDelete");
-  const projImgActionStatus = document.getElementById("projImgActionStatus");
+    const projTitleInput = document.getElementById("projTitleInput");
+    const projDescInput = document.getElementById("projDescInput");
+    const btnProjTogglePublic = document.getElementById("btnProjTogglePublic");
+    const btnProjTogglePin = document.getElementById("btnProjTogglePin");
+    const btnProjSave = document.getElementById("btnProjSave");
+    const btnProjDelete = document.getElementById("btnProjDelete");
+    const projActionStatus = document.getElementById("projActionStatus");
+    
+    const projImgSlot = document.getElementById("projImgSlot");
+    const projImgFile = document.getElementById("projImgFile");
+    const btnProjImgUpload = document.getElementById("btnProjImgUpload");
+    const btnProjImgDelete = document.getElementById("btnProjImgDelete");
+    const projImgActionStatus = document.getElementById("projImgActionStatus");
 
-  // 현재 선택된 프로젝트(모달)
-  let currentProject = null; // {id, title, description, isPublic, pinned, ...}
-  let currentImages = [];    // images-list 결과를 그대로 들고 있음
 
-  function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, (m) => ({
-      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-    }[m]));
-  }
+    // 현재 선택된 프로젝트(모달)
+    let currentProject = null; // {id, title, description, isPublic, pinned, ...}
+    let currentImages = []; // 현재 모달에 로드된 이미지들(images-list 결과)
 
-  function refreshProjectButtons() {
-    if (!currentProject) return;
-    btnProjTogglePublic.textContent = currentProject.isPublic ? "비공개로 전환" : "공개로 전환";
-    btnProjTogglePin.textContent = currentProject.pinned ? "고정해제" : "상단고정";
-  }
 
-  function setProjMeta() {
-    if (!currentProject) return;
-    projMeta.textContent =
-      `ID ${currentProject.id} · ${currentProject.isPublic ? "공개" : "비공개"} · ${currentProject.pinned ? "상단고정" : "일반"}`;
-  }
-
-  // ===== 모달 열고/닫기 (포커스/aria-hidden 안전) =====
-  function openProjModal() {
-    closeModal(); // 다른 모달 닫기
-    projModalBackdrop.style.display = "flex";
-    projModalBackdrop.removeAttribute("aria-hidden");
-    setTimeout(() => projModalClose.focus(), 0);
-  }
-
-  function closeProjModal() {
-    if (projModalBackdrop.contains(document.activeElement)) document.activeElement.blur();
-    projModalBackdrop.style.display = "none";
-    projModalBackdrop.setAttribute("aria-hidden", "true");
-  }
-
-  projModalClose.addEventListener("click", closeProjModal);
-  projModalBackdrop.addEventListener("click", (e) => { if (e.target === projModalBackdrop) closeProjModal(); });
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && projModalBackdrop.style.display === "flex") closeProjModal();
-    if (e.key === "Escape" && modalBackdrop.style.display === "flex") closeModal();
-  });
-
-  function openModal() {
-    closeProjModal(); // 다른 모달 닫기
-    modalStatus.textContent = "";
-    inpTitle.value = "";
-    inpDesc.value = "";
-    modalBackdrop.style.display = "flex";
-    modalBackdrop.removeAttribute("aria-hidden");
-    setTimeout(() => inpTitle.focus(), 0);
-  }
-
-  function closeModal() {
-    if (modalBackdrop.contains(document.activeElement)) document.activeElement.blur();
-    modalBackdrop.style.display = "none";
-    modalBackdrop.setAttribute("aria-hidden", "true");
-  }
-
-  btnAdd.addEventListener("click", openModal);
-  btnCancel.addEventListener("click", closeModal);
-  modalBackdrop.addEventListener("click", (e) => { if (e.target === modalBackdrop) closeModal(); });
-
-  // ===== API helpers =====
-  async function loadProjectDetailFromList(projectId) {
-    const res = await fetch("/api/admin/projects");
-    if (!res.ok) {
-      projActionStatus.textContent = `불러오기 실패 (HTTP ${res.status})`;
-      return null;
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, (m) => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+      }[m]));
     }
-    const data = await res.json().catch(() => ({}));
-    const p = (data.projects || []).find(x => x.id === projectId);
-    return p || null;
-  }
+    function getPublicImageUrl(objectKey) {
+    	  // 예시: /api/media?key=... 같은 형태를 이미 만들어두셨다면 여기를 그 규칙으로 맞추면 됩니다.
+    	  // 안전하게 encodeURIComponent 처리
+    	  return `/api/media?key=${encodeURIComponent(objectKey)}`;
+    	}
 
-  async function loadProjectImages(projectId) {
-    const res = await fetch(`/api/admin/projects/${projectId}/images-list`);
-    if (!res.ok) return [];
-    const data = await res.json().catch(()=>({}));
-    return data.images || [];
-  }
 
-  function renderImages(images) {
-    currentImages = Array.isArray(images) ? images : [];
+    function refreshProjectButtons() {
+      if (!currentProject) return;
+      btnProjTogglePublic.textContent = currentProject.isPublic ? "비공개로 전환" : "공개로 전환";
+      btnProjTogglePin.textContent = currentProject.pinned ? "고정해제" : "상단고정";
+    }
 
-    const bySort = new Map(currentImages.map(x => [Number(x.sort_no), x]));
-    projImages.innerHTML = [1,2,3].map(n => {
-      const img = bySort.get(n);
-      return `<div class="muted">#${n} : ${img ? escapeHtml(img.object_key) : "(없음)"}</div>`;
-    }).join("");
+    function setProjMeta() {
+      if (!currentProject) return;
+      projMeta.textContent =
+        `ID ${currentProject.id} · ${currentProject.isPublic ? "공개" : "비공개"} · ${currentProject.pinned ? "상단고정" : "일반"}`;
+    }
 
-    projImgStatus.textContent = currentImages.length ? "" : "등록된 이미지가 없습니다.";
-  }
+    // ===== 모달 열고/닫기 (포커스/aria-hidden 안전) =====
+    function openProjModal() {
+      closeModal(); // 다른 모달 닫기
+      projModalBackdrop.style.display = "flex";
+      projModalBackdrop.removeAttribute("aria-hidden");
+      setTimeout(() => projModalClose.focus(), 0);
+    }
 
-  // ===== 모달 액션: 중복 방지 위해 onclick(덮어쓰기) =====
+    function closeProjModal() {
+      if (projModalBackdrop.contains(document.activeElement)) document.activeElement.blur();
+      projModalBackdrop.style.display = "none";
+      projModalBackdrop.setAttribute("aria-hidden", "true");
+    }
 
-  // 1) 핀 토글
-  btnProjTogglePin.onclick = async () => {
-    if (!currentProject) return;
+    projModalClose.addEventListener("click", closeProjModal);
+    projModalBackdrop.addEventListener("click", (e) => { if (e.target === projModalBackdrop) closeProjModal(); });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && projModalBackdrop.style.display === "flex") closeProjModal();
+    });
 
-    const next = !currentProject.pinned;
-    projActionStatus.textContent = "고정 상태 변경 중...";
-    btnProjTogglePin.disabled = true;
+    function openModal() {
+      closeProjModal(); // 다른 모달 닫기
+      modalStatus.textContent = "";
+      inpTitle.value = "";
+      inpDesc.value = "";
+      modalBackdrop.style.display = "flex";
+      modalBackdrop.removeAttribute("aria-hidden");
+      setTimeout(() => inpTitle.focus(), 0);
+    }
 
-    try {
-      const res = await fetch(`/api/admin/projects/${currentProject.id}/pin`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pinned: next }),
-      });
-      const data = await res.json().catch(() => null);
+    function closeModal() {
+      if (modalBackdrop.contains(document.activeElement)) document.activeElement.blur();
+      modalBackdrop.style.display = "none";
+      modalBackdrop.setAttribute("aria-hidden", "true");
+    }
 
-      if (!res.ok || !data?.ok) {
-        projActionStatus.textContent = `변경 실패 (HTTP ${res.status})`;
+    btnAdd.addEventListener("click", openModal);
+    btnCancel.addEventListener("click", closeModal);
+    modalBackdrop.addEventListener("click", (e) => { if (e.target === modalBackdrop) closeModal(); });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && modalBackdrop.style.display === "flex") closeModal();
+    });
+
+    // ===== API helpers =====
+    async function loadProjectDetailFromList(projectId) {
+      // 서버에 새 API 만들지 않고, 이미 있는 목록 API에서 찾아서 씀
+      const res = await fetch("/api/admin/projects");
+      if (!res.ok) {
+        projActionStatus.textContent = `불러오기 실패 (HTTP ${res.status})`;
+        return null;
+      }
+      const data = await res.json().catch(() => ({}));
+      const p = (data.projects || []).find(x => x.id === projectId);
+      return p || null;
+    }
+
+    async function loadProjectImages(projectId) {
+      const res = await fetch(`/api/admin/projects/${projectId}/images-list`);
+      if (!res.ok) return [];
+      const data = await res.json().catch(()=>({}));
+      return data.images || [];
+    }
+
+    function renderImages(images) {
+    	  currentImages = images || [];
+    	  const bySort = new Map(currentImages.map(x => [Number(x.sort_no), x]));
+
+    	  const slotsHtml = [1,2,3].map(sortNo => {
+    	    const img = bySort.get(sortNo);
+
+    	    // ✅ 주의: object_key는 "projects/..../file.png"
+    	    // 실제 이미지 조회 URL은 이미 구현된 "serve" 엔드포인트를 사용해야 합니다.
+    	    // 만약 현재 serve URL이 다르다면, 아래 getPublicImageUrl()만 맞추면 됩니다.
+    	    const imgUrl = img ? getPublicImageUrl(img.object_key) : "";
+
+    	    return `
+    	      <div class="slot-card" data-slot="${sortNo}">
+    	        <div class="slot-head">
+    	          <div class="slot-title">슬롯 ${sortNo}</div>
+    	          <div class="muted">${img ? "등록됨" : "비어있음"}</div>
+    	        </div>
+
+    	        <div class="slot-preview" style="${img ? "" : "display:none;"}">
+    	          <img src="${img ? imgUrl : ""}" alt="slot ${sortNo}" />
+    	        </div>
+
+    	        <div class="slot-actions">
+    	          <input class="input slot-file" type="file" accept="image/*" />
+    	          <button class="btn primary slot-upload" type="button" data-slot="${sortNo}">
+    	            ${img ? "교체 업로드" : "업로드"}
+    	          </button>
+    	          <button class="btn danger slot-delete" type="button" data-slot="${sortNo}" ${img ? "" : "disabled"}>
+    	            삭제
+    	          </button>
+    	        </div>
+
+    	        <div class="field" style="margin-top:10px;">
+    	          <label>캡션(선택)</label>
+    	          <input class="input slot-caption" type="text" placeholder="없으면 비워두세요" value="${img?.caption ? escapeHtml(img.caption) : ""}" />
+    	          <div class="muted slot-status" style="margin-top:6px;"></div>
+    	        </div>
+    	      </div>
+    	    `;
+    	  }).join("");
+
+    	  projImages.innerHTML = slotsHtml;
+    	  projImgStatus.textContent = currentImages.length ? "" : "등록된 이미지가 없습니다.";
+    	}
+
+
+    // ===== 모달 액션(이벤트는 페이지 로드 시 1번만 등록) =====
+
+    // 1) 핀 토글
+    btnProjTogglePin.addEventListener("click", async () => {
+      if (!currentProject) return;
+
+      const next = !currentProject.pinned;
+      projActionStatus.textContent = "고정 상태 변경 중...";
+      btnProjTogglePin.disabled = true;
+
+      try {
+        const res = await fetch(`/api/admin/projects/${currentProject.id}/pin`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ pinned: next }),
+        });
+        const data = await res.json().catch(() => null);
+        if (!res.ok || !data?.ok) {
+          projActionStatus.textContent = `변경 실패 (HTTP ${res.status})`;
+          return;
+        }
+
+        currentProject.pinned = next;
+        refreshProjectButtons();
+        setProjMeta();
+        projActionStatus.textContent = next ? "상단 고정됨" : "고정 해제됨";
+
+        await loadProjects(); // 목록 정렬 반영
+      } finally {
+        btnProjTogglePin.disabled = false;
+      }
+    });
+
+    // 2) 공개/비공개 토글
+    btnProjTogglePublic.addEventListener("click", async () => {
+      if (!currentProject) return;
+
+      const next = !currentProject.isPublic;
+      projActionStatus.textContent = "공개 상태 변경 중...";
+      btnProjTogglePublic.disabled = true;
+
+      try {
+        const res = await fetch(`/api/admin/projects/${currentProject.id}/visibility`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ isPublic: next }),
+        });
+        const data = await res.json().catch(() => null);
+        if (!res.ok || !data?.ok) {
+          projActionStatus.textContent = `변경 실패 (HTTP ${res.status})`;
+          return;
+        }
+
+        currentProject.isPublic = next;
+        refreshProjectButtons();
+        setProjMeta();
+        projActionStatus.textContent = next ? "공개로 전환됨" : "비공개로 전환됨";
+
+        await loadProjects();
+      } finally {
+        btnProjTogglePublic.disabled = false;
+      }
+    });
+
+    // 3) 저장(제목/설명)
+    btnProjSave.addEventListener("click", async () => {
+      if (!currentProject) return;
+
+      const title = (projTitleInput.value || "").trim();
+      const description = (projDescInput.value || "").toString();
+
+      if (!title) {
+        projActionStatus.textContent = "제목은 필수입니다.";
         return;
       }
 
-      currentProject.pinned = next;
-      refreshProjectButtons();
-      setProjMeta();
-      projActionStatus.textContent = next ? "상단 고정됨" : "고정 해제됨";
+      projActionStatus.textContent = "저장 중...";
+      btnProjSave.disabled = true;
 
-      await loadProjects(); // 목록 정렬 반영
-    } finally {
-      btnProjTogglePin.disabled = false;
-    }
-  };
+      try {
+        const res = await fetch(`/api/admin/projects/${currentProject.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title, description }),
+        });
+        const data = await res.json().catch(() => null);
+        if (!res.ok || !data?.ok) {
+          projActionStatus.textContent = `저장 실패 (HTTP ${res.status})`;
+          return;
+        }
 
-  // 2) 공개/비공개 토글
-  btnProjTogglePublic.onclick = async () => {
-    if (!currentProject) return;
+        currentProject.title = title;
+        currentProject.description = description;
 
-    const next = !currentProject.isPublic;
-    projActionStatus.textContent = "공개 상태 변경 중...";
-    btnProjTogglePublic.disabled = true;
+        projModalTitle.textContent = "프로젝트 편집";
+        setProjMeta();
+        projActionStatus.textContent = "저장 완료";
 
-    try {
-      const res = await fetch(`/api/admin/projects/${currentProject.id}/visibility`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isPublic: next }),
-      });
-      const data = await res.json().catch(() => null);
-
-      if (!res.ok || !data?.ok) {
-        projActionStatus.textContent = `변경 실패 (HTTP ${res.status})`;
-        return;
+        await loadProjects();
+      } finally {
+        btnProjSave.disabled = false;
       }
+    });
 
-      currentProject.isPublic = next;
-      refreshProjectButtons();
-      setProjMeta();
-      projActionStatus.textContent = next ? "공개로 전환됨" : "비공개로 전환됨";
+    // 4) 삭제
+    btnProjImgDelete.addEventListener("click", async () => {
+	  if (!currentProject) return;
+	
+	  const sortNo = Number(projImgSlot.value || "1");
+	  if (![1,2,3].includes(sortNo)) { 
+	    projImgActionStatus.textContent = "슬롯은 1~3만 가능합니다."; 
+	    return; 
+	  }
+	
+	  // ✅ 현재 슬롯에 해당하는 이미지 찾기 (id 필요)
+	  const target = (currentImages || []).find(x => Number(x.sort_no) === sortNo);
+	  if (!target?.id) {
+	    projImgActionStatus.textContent = `슬롯 ${sortNo}에 삭제할 이미지가 없습니다.`;
+	    return;
+	  }
+	
+	  if (!confirm(`슬롯 ${sortNo} 이미지를 삭제하시겠습니까?`)) return;
+	
+	  projImgActionStatus.textContent = "삭제 중...";
+	  btnProjImgUpload.disabled = true;
+	  btnProjImgDelete.disabled = true;
+	
+	  try {
+	    // ✅ 이 프로젝트의 삭제 API는 "이미지 id" 방식으로 추정됩니다.
+	    // (서버가 "id 유효성"을 보는 에러를 이미 주고 있음)
+	    const res = await fetch(`/api/admin/projects/${currentProject.id}/images/${target.id}`, {
+	      method: "DELETE"
+	    });
+	
+	    const data = await res.json().catch(() => null);
+	    if (!res.ok || !data?.ok) {
+	      projImgActionStatus.textContent = `삭제 실패 (HTTP ${res.status})`;
+	      return;
+	    }
 
-      await loadProjects();
-    } finally {
-      btnProjTogglePublic.disabled = false;
-    }
-  };
+    projImgActionStatus.textContent = `삭제 완료 (슬롯 ${sortNo})`;
 
-  // 3) 저장(제목/설명)
-  btnProjSave.onclick = async () => {
-    if (!currentProject) return;
-
-    const title = (projTitleInput.value || "").trim();
-    const description = (projDescInput.value || "").toString();
-
-    if (!title) {
-      projActionStatus.textContent = "제목은 필수입니다.";
-      return;
-    }
-
-    projActionStatus.textContent = "저장 중...";
-    btnProjSave.disabled = true;
-
-    try {
-      const res = await fetch(`/api/admin/projects/${currentProject.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, description }),
-      });
-      const data = await res.json().catch(() => null);
-
-      if (!res.ok || !data?.ok) {
-        projActionStatus.textContent = `저장 실패 (HTTP ${res.status})`;
-        return;
-      }
-
-      currentProject.title = title;
-      currentProject.description = description;
-
-      if (projModalTitle) projModalTitle.textContent = "프로젝트 편집";
-      setProjMeta();
-      projActionStatus.textContent = "저장 완료";
-
-      await loadProjects();
-    } finally {
-      btnProjSave.disabled = false;
-    }
-  };
-
-  // 4) 프로젝트 삭제(이미지도 함께 삭제되는 서버 로직 가정)
-  btnProjDelete.onclick = async () => {
-    if (!currentProject) return;
-    if (!confirm("정말 삭제하시겠습니까? (이미지도 함께 삭제됩니다)")) return;
-
-    projActionStatus.textContent = "삭제 중...";
-    btnProjDelete.disabled = true;
-
-    try {
-      const res = await fetch(`/api/admin/projects/${currentProject.id}`, { method: "DELETE" });
-      const data = await res.json().catch(() => null);
-
-      if (!res.ok || !data?.ok) {
-        projActionStatus.textContent = `삭제 실패 (HTTP ${res.status})`;
-        return;
-      }
-
-      projActionStatus.textContent = "삭제 완료";
-      closeProjModal();
-      await loadProjects();
-    } finally {
-      btnProjDelete.disabled = false;
-    }
-  };
-
-  // 5) 모달 이미지 업로드(슬롯 1~3)
-  btnProjImgUpload.onclick = async () => {
-    if (!currentProject) return;
-
-    const sortNo = Number(projImgSlot.value || "1");
-    const file = projImgFile.files?.[0];
-
-    if (![1,2,3].includes(sortNo)) { projImgActionStatus.textContent = "슬롯은 1~3만 가능합니다."; return; }
-    if (!file) { projImgActionStatus.textContent = "이미지 파일을 선택하세요."; return; }
-
-    const fd = new FormData();
-    fd.append("file", file);
-    fd.append("sortNo", String(sortNo));
-
-    projImgActionStatus.textContent = "업로드 중...";
-    btnProjImgUpload.disabled = true;
-    btnProjImgDelete.disabled = true;
-
-    try {
-      const res = await fetch(`/api/admin/projects/${currentProject.id}/images`, {
-        method: "POST",
-        body: fd
-      });
-      const data = await res.json().catch(() => null);
-
-      if (!res.ok || !data?.ok) {
-        projImgActionStatus.textContent = `업로드 실패 (HTTP ${res.status})`;
-        return;
-      }
-
-      projImgActionStatus.textContent = `업로드 완료 (슬롯 ${sortNo})`;
-      projImgFile.value = "";
-
-      const images = await loadProjectImages(currentProject.id);
-      renderImages(images);
-    } finally {
-      btnProjImgUpload.disabled = false;
-      btnProjImgDelete.disabled = false;
-    }
-  };
-
-  // 6) 모달 이미지 삭제(✅ imageId 기반: 400 유효하지 않은 id 해결)
-  btnProjImgDelete.onclick = async () => {
-    if (!currentProject) return;
-
-    const sortNo = Number(projImgSlot.value || "1");
-    if (![1,2,3].includes(sortNo)) { projImgActionStatus.textContent = "슬롯은 1~3만 가능합니다."; return; }
-
-    // 현재 슬롯의 이미지 찾기 (images-list 결과에서 id 사용)
-    const target = (currentImages || []).find(x => Number(x.sort_no) === sortNo);
-
-    if (!target?.id) {
-      projImgActionStatus.textContent = `슬롯 ${sortNo}에 삭제할 이미지가 없습니다.`;
-      return;
-    }
-
-    if (!confirm(`슬롯 ${sortNo} 이미지를 삭제하시겠습니까?`)) return;
-
-    projImgActionStatus.textContent = "삭제 중...";
-    btnProjImgUpload.disabled = true;
-    btnProjImgDelete.disabled = true;
-
-    try {
-      // ✅ 반드시 이 경로로만 삭제: /images/{imageId}
-      const res = await fetch(`/api/admin/projects/${currentProject.id}/images/${target.id}`, {
-        method: "DELETE"
-      });
-      const data = await res.json().catch(() => null);
-
-      if (!res.ok || !data?.ok) {
-        projImgActionStatus.textContent = `삭제 실패 (HTTP ${res.status})`;
-        return;
-      }
-
-      projImgActionStatus.textContent = `삭제 완료 (슬롯 ${sortNo})`;
-
-      const images = await loadProjectImages(currentProject.id);
-      renderImages(images);
-    } finally {
-      btnProjImgUpload.disabled = false;
-      btnProjImgDelete.disabled = false;
-    }
-  };
-
-  // ===== 제목 클릭 → 편집 모달 열기 + 로드 =====
-  document.addEventListener("click", async (e) => {
-    const titleBtn = e.target.closest(".btn-title");
-    if (!titleBtn) return;
-
-    const projectId = Number(titleBtn.dataset.id);
-    openProjModal();
-
-    // 초기 UI(편집형)
-    projActionStatus.textContent = "불러오는 중...";
-    projMeta.textContent = "";
-    projTitleInput.value = "";
-    projDescInput.value = "";
-    projImages.innerHTML = "";
-    projImgStatus.textContent = "이미지 불러오는 중...";
-    projImgActionStatus.textContent = "";
-
-    // 버튼 잠금(로드 전)
-    btnProjTogglePublic.disabled = true;
-    btnProjTogglePin.disabled = true;
-    btnProjSave.disabled = true;
-    btnProjDelete.disabled = true;
-
-    const p = await loadProjectDetailFromList(projectId);
-    if (!p) {
-      projActionStatus.textContent = "프로젝트를 찾을 수 없습니다.";
-      projImgStatus.textContent = "";
-      return;
-    }
-
-    currentProject = { ...p };
-
-    // input 채우기
-    projTitleInput.value = currentProject.title || "";
-    projDescInput.value = currentProject.description || "";
-
-    // 메타/버튼
-    setProjMeta();
-    refreshProjectButtons();
-    projActionStatus.textContent = "불러오기 완료";
-
-    // 잠금 해제
-    btnProjTogglePublic.disabled = false;
-    btnProjTogglePin.disabled = false;
-    btnProjSave.disabled = false;
-    btnProjDelete.disabled = false;
-
-    // 이미지 로드/표시
-    const images = await loadProjectImages(projectId);
+    // 모달 이미지 목록 즉시 갱신
+    const images = await loadProjectImages(currentProject.id);
     renderImages(images);
-  });
-
-  // ===== (임시) 이미지 업로드 테스트 =====
-  btnUploadImg.addEventListener("click", async () => {
-    const projectId = Number(imgProjectId.value);
-    const sortNo = Number(imgSortNo.value || 1);
-    const file = imgFile.files?.[0];
-
-    if (!projectId) { imgStatus.textContent = "projectId를 입력하세요."; return; }
-    if (![1,2,3].includes(sortNo)) { imgStatus.textContent = "순서는 1~3"; return; }
-    if (!file) { imgStatus.textContent = "이미지 파일을 선택하세요."; return; }
-
-    const fd = new FormData();
-    fd.append("file", file);
-    fd.append("sortNo", String(sortNo));
-
-    imgStatus.textContent = "업로드 중...";
-    btnUploadImg.disabled = true;
-
-    try {
-      const res = await fetch(`/api/admin/projects/${projectId}/images`, {
-        method: "POST",
-        body: fd
-      });
-      const data = await res.json().catch(()=>null);
-
-      if (!res.ok || !data?.ok) {
-        imgStatus.textContent = `업로드 실패 (HTTP ${res.status})`;
-        return;
-      }
-      imgStatus.textContent = `업로드 완료: ${data.objectKey}`;
-    } finally {
-      btnUploadImg.disabled = false;
-    }
-  });
-
-  // ===== 프로젝트 추가 =====
-  btnSave.addEventListener("click", async () => {
-    const title = (inpTitle.value || "").trim();
-    const description = (inpDesc.value || "").toString();
-
-    if (!title) {
-      modalStatus.textContent = "제목은 필수입니다.";
-      return;
-    }
-
-    btnSave.disabled = true;
-    modalStatus.textContent = "저장 중...";
-
-    try {
-      const res = await fetch(`${API_BASE}/api/admin/projects`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, description })
-      });
-      const data = await res.json().catch(() => null);
-
-      if (!res.ok || !data?.ok) {
-        modalStatus.textContent = `저장 실패 (HTTP ${res.status})`;
-        return;
-      }
-
-      modalStatus.textContent = "저장 완료!";
-      closeModal();
-      await loadProjects();
-    } catch (err) {
-      modalStatus.textContent = "저장 중 오류가 발생했습니다.";
-    } finally {
-      btnSave.disabled = false;
-    }
-  });
-
-  // ===== 리스트 로딩 =====
-  async function loadProjects() {
-    statusEl.textContent = "불러오는 중...";
-    tbl.style.display = "none";
-    tbody.innerHTML = "";
-
-    const res = await fetch(`${API_BASE}/api/admin/projects`, { method: "GET" });
-    if (!res.ok) {
-      statusEl.textContent = `불러오기 실패 (HTTP ${res.status})`;
-      return;
-    }
-    const data = await res.json().catch(() => ({}));
-    const projects = data.projects || [];
-
-    if (projects.length === 0) {
-      statusEl.textContent = "등록된 프로젝트가 없습니다.";
-      return;
-    }
-
-    statusEl.textContent = `총 ${projects.length}개`;
-    tbl.style.display = "";
-    tbody.innerHTML = projects.map(p => {
-      const badge = p.isPublic
-        ? `<span class="badge public">공개</span>`
-        : `<span class="badge private">비공개</span>`;
-      return `
-        <tr>
-          <td class="mono">${p.id}</td>
-          <td>
-            <button class="btn btn-title" data-id="${p.id}" style="width:100%; text-align:left;">
-              ${escapeHtml(p.title)}
-            </button>
-          </td>
-          <td>${badge}</td>
-          <td class="mono">${escapeHtml(p.createdAt || "")}</td>
-          <td>
-            <div class="row">
-              <button class="btn btn-edit" data-id="${p.id}">수정</button>
-              <button class="btn btn-toggle" data-id="${p.id}" data-public="${p.isPublic}">
-                ${p.isPublic ? "비공개" : "공개"}
-              </button>
-              <button class="btn btn-pin" data-id="${p.id}" data-pinned="${p.pinned}">
-                ${p.pinned ? "고정해제" : "상단고정"}
-              </button>
-              <button class="btn danger btn-delete" data-id="${p.id}">삭제</button>
-            </div>
-          </td>
-        </tr>
-      `;
-    }).join("");
+  } finally {
+    btnProjImgUpload.disabled = false;
+    btnProjImgDelete.disabled = false;
   }
+});
 
-  btnReload.addEventListener("click", loadProjects);
 
-  // 리스트 버튼(임시)
-  document.addEventListener("click", async (e) => {
-    const editBtn = e.target.closest(".btn-edit");
-    const toggleBtn = e.target.closest(".btn-toggle");
-    const deleteBtn = e.target.closest(".btn-delete");
-    const pinBtn = e.target.closest(".btn-pin");
+    btnProjImgUpload.addEventListener("click", async () => {
+    	  if (!currentProject) return;
 
-    if (pinBtn) {
-      const id = pinBtn.dataset.id;
-      const pinnedRaw = pinBtn.dataset.pinned;
-      const pinned = (pinnedRaw === "true" || pinnedRaw === "1");
+    	  const sortNo = Number(projImgSlot.value || "1");
+    	  const file = projImgFile.files?.[0];
 
-      await fetch(`/api/admin/projects/${id}/pin`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pinned: !pinned })
-      });
+    	  if (![1,2,3].includes(sortNo)) { projImgActionStatus.textContent = "슬롯은 1~3만 가능합니다."; return; }
+    	  if (!file) { projImgActionStatus.textContent = "이미지 파일을 선택하세요."; return; }
 
-      await loadProjects();
-      return;
+    	  const fd = new FormData();
+    	  fd.append("file", file);
+    	  fd.append("sortNo", String(sortNo));
+
+    	  projImgActionStatus.textContent = "업로드 중...";
+    	  btnProjImgUpload.disabled = true;
+    	  btnProjImgDelete.disabled = true;
+
+    	  try {
+    	    const res = await fetch(`/api/admin/projects/${currentProject.id}/images`, {
+    	      method: "POST",
+    	      body: fd
+    	    });
+
+    	    const data = await res.json().catch(() => null);
+    	    if (!res.ok || !data?.ok) {
+    	      projImgActionStatus.textContent = `업로드 실패 (HTTP ${res.status})`;
+    	      return;
+    	    }
+
+    	    projImgActionStatus.textContent = `업로드 완료 (슬롯 ${sortNo})`;
+    	    projImgFile.value = ""; // 선택 초기화
+
+    	    // 모달 이미지 목록 즉시 갱신
+    	    const images = await loadProjectImages(currentProject.id);
+    	    renderImages(images);
+    	  } finally {
+    	    btnProjImgUpload.disabled = false;
+    	    btnProjImgDelete.disabled = false;
+    	  }
+    	});
+    
+    btnProjImgDelete.addEventListener("click", async () => {
+    	  if (!currentProject) return;
+
+    	  const sortNo = Number(projImgSlot.value || "1");
+    	  if (![1,2,3].includes(sortNo)) { projImgActionStatus.textContent = "슬롯은 1~3만 가능합니다."; return; }
+
+    	  if (!confirm(`슬롯 ${sortNo} 이미지를 삭제하시겠습니까?`)) return;
+
+    	  projImgActionStatus.textContent = "삭제 중...";
+    	  btnProjImgUpload.disabled = true;
+    	  btnProjImgDelete.disabled = true;
+
+    	  try {
+    	    // ✅ 삭제 API 엔드포인트는 프로젝트에 따라 다를 수 있어요.
+    	    // 지금은 "가장 흔한 형태"로 먼저 붙입니다.
+    	    // 만약 404가 뜨면, 다음 메시지에서 지금 쓰는 실제 삭제 엔드포인트로 맞춰드릴게요.
+    	    const res = await fetch(`/api/admin/projects/${currentProject.id}/images?sortNo=${sortNo}`, {
+    	      method: "DELETE"
+    	    });
+
+    	    const data = await res.json().catch(() => null);
+    	    if (!res.ok || !data?.ok) {
+    	      projImgActionStatus.textContent = `삭제 실패 (HTTP ${res.status})`;
+    	      return;
+    	    }
+
+    	    projImgActionStatus.textContent = `삭제 완료 (슬롯 ${sortNo})`;
+
+    	    // 모달 이미지 목록 즉시 갱신
+    	    const images = await loadProjectImages(currentProject.id);
+    	    renderImages(images);
+    	  } finally {
+    	    btnProjImgUpload.disabled = false;
+    	    btnProjImgDelete.disabled = false;
+    	  }
+    	});
+
+
+    // ===== 제목 클릭 → 편집 모달 열기 + 로드 =====
+    document.addEventListener("click", async (e) => {
+      const titleBtn = e.target.closest(".btn-title");
+      if (!titleBtn) return;
+
+      const projectId = Number(titleBtn.dataset.id);
+      openProjModal();
+
+      // 초기 UI(편집형)
+      projActionStatus.textContent = "불러오는 중...";
+      projMeta.textContent = "";
+      projTitleInput.value = "";
+      projDescInput.value = "";
+      projImages.innerHTML = "";
+      projImgStatus.textContent = "이미지 불러오는 중...";
+
+      // 버튼 잠금(로드 전)
+      btnProjTogglePublic.disabled = true;
+      btnProjTogglePin.disabled = true;
+      btnProjSave.disabled = true;
+      btnProjDelete.disabled = true;
+
+      const p = await loadProjectDetailFromList(projectId);
+      if (!p) {
+        projActionStatus.textContent = "프로젝트를 찾을 수 없습니다.";
+        projImgStatus.textContent = "";
+        return;
+      }
+
+      currentProject = { ...p };
+
+      // input 채우기
+      projTitleInput.value = currentProject.title || "";
+      projDescInput.value = currentProject.description || "";
+
+      // 메타/버튼
+      setProjMeta();
+      refreshProjectButtons();
+
+      projActionStatus.textContent = "불러오기 완료";
+
+      // 잠금 해제
+      btnProjTogglePublic.disabled = false;
+      btnProjTogglePin.disabled = false;
+      btnProjSave.disabled = false;
+      btnProjDelete.disabled = false;
+
+      // 이미지
+      const images = await loadProjectImages(projectId);
+      renderImages(images);
+    });
+
+    // ===== 이미지 업로드(임시) =====
+    btnUploadImg.addEventListener("click", async () => {
+      const projectId = Number(imgProjectId.value);
+      const sortNo = Number(imgSortNo.value || 1);
+      const file = imgFile.files?.[0];
+
+      if (!projectId) { imgStatus.textContent = "projectId를 입력하세요."; return; }
+      if (![1,2,3].includes(sortNo)) { imgStatus.textContent = "순서는 1~3"; return; }
+      if (!file) { imgStatus.textContent = "이미지 파일을 선택하세요."; return; }
+
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("sortNo", String(sortNo));
+
+      imgStatus.textContent = "업로드 중...";
+      btnUploadImg.disabled = true;
+
+      try {
+        const res = await fetch(`/api/admin/projects/${projectId}/images`, {
+          method: "POST",
+          body: fd
+        });
+        const data = await res.json().catch(()=>null);
+        if (!res.ok || !data?.ok) {
+          imgStatus.textContent = `업로드 실패 (HTTP ${res.status})`;
+          return;
+        }
+        imgStatus.textContent = `업로드 완료: ${data.objectKey}`;
+      } finally {
+        btnUploadImg.disabled = false;
+      }
+    });
+
+    // ===== 프로젝트 추가 =====
+    btnSave.addEventListener("click", async () => {
+      const title = (inpTitle.value || "").trim();
+      const description = (inpDesc.value || "").toString();
+
+      if (!title) {
+        modalStatus.textContent = "제목은 필수입니다.";
+        return;
+      }
+
+      btnSave.disabled = true;
+      modalStatus.textContent = "저장 중...";
+
+      try {
+        const res = await fetch(`${API_BASE}/api/admin/projects`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title, description })
+        });
+
+        const data = await res.json().catch(() => null);
+
+        if (!res.ok || !data?.ok) {
+          modalStatus.textContent = `저장 실패 (HTTP ${res.status})`;
+          btnSave.disabled = false;
+          return;
+        }
+
+        modalStatus.textContent = "저장 완료!";
+        closeModal();
+        await loadProjects();
+      } catch (err) {
+        modalStatus.textContent = "저장 중 오류가 발생했습니다.";
+      } finally {
+        btnSave.disabled = false;
+      }
+    });
+
+    // ===== 리스트 로딩 =====
+    async function loadProjects() {
+      statusEl.textContent = "불러오는 중...";
+      tbl.style.display = "none";
+      tbody.innerHTML = "";
+
+      const res = await fetch(`${API_BASE}/api/admin/projects`, { method: "GET" });
+      if (!res.ok) {
+        statusEl.textContent = `불러오기 실패 (HTTP ${res.status})`;
+        return;
+      }
+      const data = await res.json().catch(() => ({}));
+      const projects = data.projects || [];
+
+      if (projects.length === 0) {
+        statusEl.textContent = "등록된 프로젝트가 없습니다.";
+        return;
+      }
+
+      statusEl.textContent = `총 ${projects.length}개`;
+      tbl.style.display = "";
+      tbody.innerHTML = projects.map(p => {
+        const badge = p.isPublic
+          ? `<span class="badge public">공개</span>`
+          : `<span class="badge private">비공개</span>`;
+        return `
+          <tr>
+            <td class="mono">${p.id}</td>
+            <td>
+              <button class="btn btn-title" data-id="${p.id}" style="width:100%; text-align:left;">
+                ${escapeHtml(p.title)}
+              </button>
+            </td>
+            <td>${badge}</td>
+            <td class="mono">${escapeHtml(p.createdAt || "")}</td>
+            <td>
+              <div class="row">
+                <!-- 나중에 리스트 버튼을 없앨 예정이라 하셔서, 일단 남겨두되 기존 로직 그대로 -->
+                <button class="btn btn-edit" data-id="${p.id}">수정</button>
+                <button class="btn btn-toggle" data-id="${p.id}" data-public="${p.isPublic}">
+                  ${p.isPublic ? "비공개" : "공개"}
+                </button>
+                <button class="btn btn-pin" data-id="${p.id}" data-pinned="${p.pinned}">
+                  ${p.pinned ? "고정해제" : "상단고정"}
+                </button>
+                <button class="btn danger btn-delete" data-id="${p.id}">삭제</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join("");
     }
 
-    if (editBtn) {
-      const id = editBtn.dataset.id;
-      const row = editBtn.closest("tr");
-      const title = row.children[1].innerText;
+    btnReload.addEventListener("click", loadProjects);
 
-      const newTitle = prompt("제목 수정", title);
-      if (!newTitle) return;
+    // 리스트 버튼(임시)
+    document.addEventListener("click", async (e) => {
+      const editBtn = e.target.closest(".btn-edit");
+      const toggleBtn = e.target.closest(".btn-toggle");
+      const deleteBtn = e.target.closest(".btn-delete");
+      const pinBtn = e.target.closest(".btn-pin");
 
-      await fetch(`/api/admin/projects/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: newTitle, description: "" })
-      });
+      if (pinBtn) {
+        const id = pinBtn.dataset.id;
+        const pinnedRaw = pinBtn.dataset.pinned;
+        const pinned = (pinnedRaw === "true" || pinnedRaw === "1");
 
-      await loadProjects();
-      return;
-    }
+        await fetch(`/api/admin/projects/${id}/pin`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ pinned: !pinned })
+        });
 
-    if (toggleBtn) {
-      const id = toggleBtn.dataset.id;
-      const isPublic = toggleBtn.dataset.public === "true";
+        await loadProjects();
+        return;
+      }
 
-      await fetch(`/api/admin/projects/${id}/visibility`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isPublic: !isPublic })
-      });
+      if (editBtn) {
+        const id = editBtn.dataset.id;
+        const row = editBtn.closest("tr");
+        const title = row.children[1].innerText;
 
-      await loadProjects();
-      return;
-    }
+        const newTitle = prompt("제목 수정", title);
+        if (!newTitle) return;
 
-    if (deleteBtn) {
-      const id = deleteBtn.dataset.id;
-      if (!confirm("정말 삭제하시겠습니까?")) return;
+        await fetch(`/api/admin/projects/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title: newTitle, description: "" })
+        });
 
-      await fetch(`/api/admin/projects/${id}`, { method: "DELETE" });
-      await loadProjects();
-      return;
-    }
-  });
+        await loadProjects();
+        return;
+      }
 
-  // 최초 로드
-  loadProjects();
-</script>
+      if (toggleBtn) {
+        const id = toggleBtn.dataset.id;
+        const isPublic = toggleBtn.dataset.public === "true";
 
+        await fetch(`/api/admin/projects/${id}/visibility`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ isPublic: !isPublic })
+        });
+
+        await loadProjects();
+        return;
+      }
+
+      if (deleteBtn) {
+        const id = deleteBtn.dataset.id;
+        if (!confirm("정말 삭제하시겠습니까?")) return;
+
+        await fetch(`/api/admin/projects/${id}`, { method: "DELETE" });
+        await loadProjects();
+        return;
+      }
+      document.addEventListener("click", async (e) => {
+    	  const uploadBtn = e.target.closest(".slot-upload");
+    	  const deleteBtn = e.target.closest(".slot-delete");
+
+    	  // 업로드
+    	  if (uploadBtn) {
+    	    if (!currentProject) return;
+
+    	    const sortNo = Number(uploadBtn.dataset.slot);
+    	    const slotCard = uploadBtn.closest(".slot-card");
+    	    const fileInput = slotCard.querySelector(".slot-file");
+    	    const captionInput = slotCard.querySelector(".slot-caption");
+    	    const statusEl = slotCard.querySelector(".slot-status");
+
+    	    const file = fileInput?.files?.[0];
+    	    const caption = (captionInput?.value || "").toString();
+
+    	    if (![1,2,3].includes(sortNo)) return;
+    	    if (!file) { statusEl.textContent = "이미지 파일을 선택하세요."; return; }
+
+    	    statusEl.textContent = "업로드 중...";
+    	    uploadBtn.disabled = true;
+
+    	    try {
+    	      const fd = new FormData();
+    	      fd.append("file", file);
+    	      fd.append("sortNo", String(sortNo));
+    	      fd.append("caption", caption); // 서버가 아직 안 받으면 무시됨(다음 단계에서 서버 지원 추가)
+
+    	      const res = await fetch(`/api/admin/projects/${currentProject.id}/images`, {
+    	        method: "POST",
+    	        body: fd
+    	      });
+
+    	      const data = await res.json().catch(() => null);
+    	      if (!res.ok || !data?.ok) {
+    	        statusEl.textContent = `업로드 실패 (HTTP ${res.status})`;
+    	        return;
+    	      }
+
+    	      statusEl.textContent = "업로드 완료";
+    	      // 리스트 갱신
+    	      const images = await loadProjectImages(currentProject.id);
+    	      renderImages(images);
+    	    } finally {
+    	      uploadBtn.disabled = false;
+    	    }
+
+    	    return;
+    	  }
+
+    	  // 삭제
+    	  if (deleteBtn) {
+    	    if (!currentProject) return;
+
+    	    const sortNo = Number(deleteBtn.dataset.slot);
+    	    const slotCard = deleteBtn.closest(".slot-card");
+    	    const statusEl = slotCard.querySelector(".slot-status");
+
+    	    if (![1,2,3].includes(sortNo)) return;
+
+    	    // 현재 슬롯에 해당하는 이미지 찾기
+    	    const target = (currentImages || []).find(x => Number(x.sort_no) === sortNo);
+    	    if (!target?.id) {
+    	      statusEl.textContent = "삭제할 이미지가 없습니다.";
+    	      return;
+    	    }
+
+    	    if (!confirm(`슬롯 ${sortNo} 이미지를 삭제하시겠습니까?`)) return;
+
+    	    statusEl.textContent = "삭제 중...";
+    	    deleteBtn.disabled = true;
+
+    	    try {
+    	      // ✅ 이번에 만든 라우트 사용
+    	      const res = await fetch(`/api/admin/projects/${currentProject.id}/images/${target.id}`, {
+    	        method: "DELETE"
+    	      });
+
+    	      const data = await res.json().catch(() => null);
+    	      if (!res.ok || !data?.ok) {
+    	        statusEl.textContent = `삭제 실패 (HTTP ${res.status})`;
+    	        return;
+    	      }
+
+    	      statusEl.textContent = "삭제 완료";
+    	      const images = await loadProjectImages(currentProject.id);
+    	      renderImages(images);
+    	    } finally {
+    	      deleteBtn.disabled = false;
+    	    }
+
+    	    return;
+    	  }
+    	});
+
+    });
+
+    // 최초 로드
+    loadProjects();
+  </script>
 </body>
 </html>
