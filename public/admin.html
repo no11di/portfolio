@@ -208,6 +208,8 @@
 
     // 현재 선택된 프로젝트(모달)
     let currentProject = null; // {id, title, description, isPublic, pinned, ...}
+    let currentImages = []; // 현재 모달에 로드된 이미지들(images-list 결과)
+
 
     function escapeHtml(s) {
       return String(s).replace(/[&<>"']/g, (m) => ({
@@ -291,6 +293,7 @@
     }
 
     function renderImages(images) {
+      currentImages = images
       const bySort = new Map(images.map(x => [x.sort_no, x]));
       projImages.innerHTML = [1,2,3].map(n => {
         const img = bySort.get(n);
@@ -404,28 +407,52 @@
     });
 
     // 4) 삭제
-    btnProjDelete.addEventListener("click", async () => {
-      if (!currentProject) return;
-      if (!confirm("정말 삭제하시겠습니까? (이미지도 함께 삭제됩니다)")) return;
+    btnProjImgDelete.addEventListener("click", async () => {
+	  if (!currentProject) return;
+	
+	  const sortNo = Number(projImgSlot.value || "1");
+	  if (![1,2,3].includes(sortNo)) { 
+	    projImgActionStatus.textContent = "슬롯은 1~3만 가능합니다."; 
+	    return; 
+	  }
+	
+	  // ✅ 현재 슬롯에 해당하는 이미지 찾기 (id 필요)
+	  const target = (currentImages || []).find(x => Number(x.sort_no) === sortNo);
+	  if (!target?.id) {
+	    projImgActionStatus.textContent = `슬롯 ${sortNo}에 삭제할 이미지가 없습니다.`;
+	    return;
+	  }
+	
+	  if (!confirm(`슬롯 ${sortNo} 이미지를 삭제하시겠습니까?`)) return;
+	
+	  projImgActionStatus.textContent = "삭제 중...";
+	  btnProjImgUpload.disabled = true;
+	  btnProjImgDelete.disabled = true;
+	
+	  try {
+	    // ✅ 이 프로젝트의 삭제 API는 "이미지 id" 방식으로 추정됩니다.
+	    // (서버가 "id 유효성"을 보는 에러를 이미 주고 있음)
+	    const res = await fetch(`/api/admin/projects/${currentProject.id}/images/${target.id}`, {
+	      method: "DELETE"
+	    });
+	
+	    const data = await res.json().catch(() => null);
+	    if (!res.ok || !data?.ok) {
+	      projImgActionStatus.textContent = `삭제 실패 (HTTP ${res.status})`;
+	      return;
+	    }
 
-      projActionStatus.textContent = "삭제 중...";
-      btnProjDelete.disabled = true;
+    projImgActionStatus.textContent = `삭제 완료 (슬롯 ${sortNo})`;
 
-      try {
-        const res = await fetch(`/api/admin/projects/${currentProject.id}`, { method: "DELETE" });
-        const data = await res.json().catch(() => null);
-        if (!res.ok || !data?.ok) {
-          projActionStatus.textContent = `삭제 실패 (HTTP ${res.status})`;
-          return;
-        }
+    // 모달 이미지 목록 즉시 갱신
+    const images = await loadProjectImages(currentProject.id);
+    renderImages(images);
+  } finally {
+    btnProjImgUpload.disabled = false;
+    btnProjImgDelete.disabled = false;
+  }
+});
 
-        projActionStatus.textContent = "삭제 완료";
-        closeProjModal();
-        await loadProjects();
-      } finally {
-        btnProjDelete.disabled = false;
-      }
-    });
 
     btnProjImgUpload.addEventListener("click", async () => {
     	  if (!currentProject) return;
