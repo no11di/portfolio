@@ -109,10 +109,27 @@
       </div>
 
       <div class="field" style="margin-top:12px;">
-        <label>이미지(1~3)</label>
-        <div id="projImages" class="row" style="gap:10px; flex-direction:column;"></div>
-        <div class="muted" id="projImgStatus" style="margin-top:6px;"></div>
-      </div>
+      <label>이미지(1~3)</label>
+	
+	  <!-- 현재 등록된 이미지 표시 -->
+      <div id="projImages" class="row" style="gap:10px; flex-direction:column;"></div>
+      <div class="muted" id="projImgStatus" style="margin-top:6px;"></div>
+	
+	  <!-- 업로드/삭제 UI -->
+	  <div class="row" style="margin-top:12px; align-items:center;">
+	    <select class="input" id="projImgSlot" style="width:140px;">
+	      <option value="1">슬롯 1</option>
+	      <option value="2">슬롯 2</option>
+	      <option value="3">슬롯 3</option>
+	    </select>
+	    <input class="input" id="projImgFile" type="file" accept="image/*" style="flex:1;" />
+	    <button class="btn primary" id="btnProjImgUpload">업로드</button>
+	    <button class="btn danger" id="btnProjImgDelete">삭제</button>
+	  </div>
+	
+	  <div class="muted" id="projImgActionStatus" style="margin-top:8px;"></div>
+	</div>
+
 
       <div class="modal-actions">
         <button class="btn" id="projModalClose">닫기</button>
@@ -181,6 +198,13 @@
     const btnProjSave = document.getElementById("btnProjSave");
     const btnProjDelete = document.getElementById("btnProjDelete");
     const projActionStatus = document.getElementById("projActionStatus");
+    
+    const projImgSlot = document.getElementById("projImgSlot");
+    const projImgFile = document.getElementById("projImgFile");
+    const btnProjImgUpload = document.getElementById("btnProjImgUpload");
+    const btnProjImgDelete = document.getElementById("btnProjImgDelete");
+    const projImgActionStatus = document.getElementById("projImgActionStatus");
+
 
     // 현재 선택된 프로젝트(모달)
     let currentProject = null; // {id, title, description, isPublic, pinned, ...}
@@ -402,6 +426,85 @@
         btnProjDelete.disabled = false;
       }
     });
+
+    btnProjImgUpload.addEventListener("click", async () => {
+    	  if (!currentProject) return;
+
+    	  const sortNo = Number(projImgSlot.value || "1");
+    	  const file = projImgFile.files?.[0];
+
+    	  if (![1,2,3].includes(sortNo)) { projImgActionStatus.textContent = "슬롯은 1~3만 가능합니다."; return; }
+    	  if (!file) { projImgActionStatus.textContent = "이미지 파일을 선택하세요."; return; }
+
+    	  const fd = new FormData();
+    	  fd.append("file", file);
+    	  fd.append("sortNo", String(sortNo));
+
+    	  projImgActionStatus.textContent = "업로드 중...";
+    	  btnProjImgUpload.disabled = true;
+    	  btnProjImgDelete.disabled = true;
+
+    	  try {
+    	    const res = await fetch(`/api/admin/projects/${currentProject.id}/images`, {
+    	      method: "POST",
+    	      body: fd
+    	    });
+
+    	    const data = await res.json().catch(() => null);
+    	    if (!res.ok || !data?.ok) {
+    	      projImgActionStatus.textContent = `업로드 실패 (HTTP ${res.status})`;
+    	      return;
+    	    }
+
+    	    projImgActionStatus.textContent = `업로드 완료 (슬롯 ${sortNo})`;
+    	    projImgFile.value = ""; // 선택 초기화
+
+    	    // 모달 이미지 목록 즉시 갱신
+    	    const images = await loadProjectImages(currentProject.id);
+    	    renderImages(images);
+    	  } finally {
+    	    btnProjImgUpload.disabled = false;
+    	    btnProjImgDelete.disabled = false;
+    	  }
+    	});
+    
+    btnProjImgDelete.addEventListener("click", async () => {
+    	  if (!currentProject) return;
+
+    	  const sortNo = Number(projImgSlot.value || "1");
+    	  if (![1,2,3].includes(sortNo)) { projImgActionStatus.textContent = "슬롯은 1~3만 가능합니다."; return; }
+
+    	  if (!confirm(`슬롯 ${sortNo} 이미지를 삭제하시겠습니까?`)) return;
+
+    	  projImgActionStatus.textContent = "삭제 중...";
+    	  btnProjImgUpload.disabled = true;
+    	  btnProjImgDelete.disabled = true;
+
+    	  try {
+    	    // ✅ 삭제 API 엔드포인트는 프로젝트에 따라 다를 수 있어요.
+    	    // 지금은 "가장 흔한 형태"로 먼저 붙입니다.
+    	    // 만약 404가 뜨면, 다음 메시지에서 지금 쓰는 실제 삭제 엔드포인트로 맞춰드릴게요.
+    	    const res = await fetch(`/api/admin/projects/${currentProject.id}/images?sortNo=${sortNo}`, {
+    	      method: "DELETE"
+    	    });
+
+    	    const data = await res.json().catch(() => null);
+    	    if (!res.ok || !data?.ok) {
+    	      projImgActionStatus.textContent = `삭제 실패 (HTTP ${res.status})`;
+    	      return;
+    	    }
+
+    	    projImgActionStatus.textContent = `삭제 완료 (슬롯 ${sortNo})`;
+
+    	    // 모달 이미지 목록 즉시 갱신
+    	    const images = await loadProjectImages(currentProject.id);
+    	    renderImages(images);
+    	  } finally {
+    	    btnProjImgUpload.disabled = false;
+    	    btnProjImgDelete.disabled = false;
+    	  }
+    	});
+
 
     // ===== 제목 클릭 → 편집 모달 열기 + 로드 =====
     document.addEventListener("click", async (e) => {
