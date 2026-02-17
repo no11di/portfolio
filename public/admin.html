@@ -24,15 +24,15 @@
     .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
     .right { text-align:right; }
     .modal-backdrop { position: fixed; inset:0; background: rgba(0,0,0,0.6); display:none; align-items:center; justify-content:center; padding:20px; }
-	.modal { width:min(720px, 100%); background:#111; border:1px solid #2a2a2a; border-radius:14px; padding:16px; }
-	.modal h2 { margin:0 0 12px; font-size:16px; }
-	.field { display:flex; flex-direction:column; gap:6px; margin-top:10px; }
-	.field label { color:#bbb; font-size:13px; }
-	.input, .textarea { background:#0b0b0b; color:#fff; border:1px solid #333; border-radius:10px; padding:10px 12px; }
-	.textarea { min-height:140px; resize:vertical; white-space:pre-wrap; }
-	.modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:14px; }
-	.btn.primary { background:#ffffff; color:#000; border-color:#fff; }
-	.btn.danger { border-color:#7a2c2c; }
+    .modal { width:min(720px, 100%); background:#111; border:1px solid #2a2a2a; border-radius:14px; padding:16px; }
+    .modal h2 { margin:0 0 12px; font-size:16px; }
+    .field { display:flex; flex-direction:column; gap:6px; margin-top:10px; }
+    .field label { color:#bbb; font-size:13px; }
+    .input, .textarea { background:#0b0b0b; color:#fff; border:1px solid #333; border-radius:10px; padding:10px 12px; }
+    .textarea { min-height:140px; resize:vertical; white-space:pre-wrap; }
+    .modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:14px; }
+    .btn.primary { background:#ffffff; color:#000; border-color:#fff; }
+    .btn.danger { border-color:#7a2c2c; }
   </style>
 </head>
 <body>
@@ -48,18 +48,17 @@
           <div class="muted">API</div>
           <div class="mono" id="apiBase"></div>
           <hr style="border:0;border-top:1px solid #222;margin:16px 0;" />
-			<div class="muted">이미지 업로드 테스트 (임시)</div>
-			<div class="row" style="margin-top:10px; align-items:center;">
-			  <input class="input" id="imgProjectId" type="number" placeholder="projectId 예: 4" style="width:140px;" />
-			  <input class="input" id="imgSortNo" type="number" placeholder="순서 1~3" style="width:140px;" />
-			  <input class="input" id="imgFile" type="file" accept="image/*" style="flex:1;" />
-			  <button class="btn primary" id="btnUploadImg">업로드</button>
-			</div>
-			<div class="muted" id="imgStatus" style="margin-top:8px;"></div>
-          
+          <div class="muted">이미지 업로드 테스트 (임시)</div>
+          <div class="row" style="margin-top:10px; align-items:center;">
+            <input class="input" id="imgProjectId" type="number" placeholder="projectId 예: 4" style="width:140px;" />
+            <input class="input" id="imgSortNo" type="number" placeholder="순서 1~3" style="width:140px;" />
+            <input class="input" id="imgFile" type="file" accept="image/*" style="flex:1;" />
+            <button class="btn primary" id="btnUploadImg">업로드</button>
+          </div>
+          <div class="muted" id="imgStatus" style="margin-top:8px;"></div>
         </div>
         <div class="row">
-          <button class="btn" id="btnAdd">+ 항목추가</button>        
+          <button class="btn" id="btnAdd">+ 항목추가</button>
           <button class="btn" id="btnReload">새로고침</button>
         </div>
       </div>
@@ -80,67 +79,71 @@
       </table>
     </div>
   </main>
+
+  <!-- 프로젝트 편집 모달 -->
   <div class="modal-backdrop" id="projModalBackdrop" aria-hidden="true">
-	  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="projModalTitle">
-			<h2 style="margin:0 0 12px; font-size:16px;">프로젝트 편집</h2>
-			
-			<div class="field">
-			  <label for="projTitleInput">제목</label>
-			  <input class="input" id="projTitleInput" type="text" />
-			</div>
-			
-			<div class="muted" id="projMeta" style="margin-top:8px;"></div>
-			
-			<div class="field" style="margin-top:12px;">
-			  <label for="projDescInput">설명 (여러 줄 가능)</label>
-			  <textarea class="textarea" id="projDescInput" style="min-height:140px;"></textarea>
-			</div>
-			
-			<div class="field" style="margin-top:12px;">
-			  <label>상태</label>
-			  <div class="row" style="gap:10px;">
-			    <button class="btn" id="btnProjTogglePublic"></button>
-			    <button class="btn" id="btnProjTogglePin"></button>
-			    <button class="btn primary" id="btnProjSave">저장</button>
-			    <button class="btn danger" id="btnProjDelete">삭제</button>
-			  </div>
-			  <div class="muted" id="projActionStatus" style="margin-top:8px;"></div>
-			</div>
-			
-			<div class="field" style="margin-top:12px;">
-			  <label>이미지(1~3)</label>
-			  <div id="projImages" class="row" style="gap:10px; flex-direction:column;"></div>
-			  <div class="muted" id="projImgStatus" style="margin-top:6px;"></div>
-			</div>
-			
-			<div class="modal-actions">
-			  <button class="btn" id="projModalClose">닫기</button>
-			</div>
-  		</div>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="projModalTitle">
+      <h2 id="projModalTitle" style="margin:0 0 12px; font-size:16px;">프로젝트 편집</h2>
+
+      <div class="field">
+        <label for="projTitleInput">제목</label>
+        <input class="input" id="projTitleInput" type="text" />
+      </div>
+
+      <div class="muted" id="projMeta" style="margin-top:8px;"></div>
+
+      <div class="field" style="margin-top:12px;">
+        <label for="projDescInput">설명 (여러 줄 가능)</label>
+        <textarea class="textarea" id="projDescInput" style="min-height:140px;"></textarea>
+      </div>
+
+      <div class="field" style="margin-top:12px;">
+        <label>상태</label>
+        <div class="row" style="gap:10px;">
+          <button class="btn" id="btnProjTogglePublic"></button>
+          <button class="btn" id="btnProjTogglePin"></button>
+          <button class="btn primary" id="btnProjSave">저장</button>
+          <button class="btn danger" id="btnProjDelete">삭제</button>
+        </div>
+        <div class="muted" id="projActionStatus" style="margin-top:8px;"></div>
+      </div>
+
+      <div class="field" style="margin-top:12px;">
+        <label>이미지(1~3)</label>
+        <div id="projImages" class="row" style="gap:10px; flex-direction:column;"></div>
+        <div class="muted" id="projImgStatus" style="margin-top:6px;"></div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn" id="projModalClose">닫기</button>
+      </div>
+    </div>
   </div>
+
+  <!-- 프로젝트 추가 모달 -->
   <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true">
-	  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-	    <h2 id="modalTitle">프로젝트 추가</h2>
-	
-	    <div class="field">
-	      <label for="inpTitle">제목</label>
-	      <input class="input" id="inpTitle" type="text" placeholder="예: 빗썸 코인대여 서비스" />
-	    </div>
-	
-	    <div class="field">
-	      <label for="inpDesc">설명 (여러 줄 가능)</label>
-	      <textarea class="textarea" id="inpDesc" placeholder="여기에 설명을 입력하세요."></textarea>
-	    </div>
-	
-	    <div class="modal-actions">
-	      <button class="btn" id="btnCancel">취소</button>
-	      <button class="btn primary" id="btnSave">저장 후 업로드</button>
-	    </div>
-	
-	    <div class="muted" id="modalStatus" style="margin-top:10px;"></div>
-	  </div>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <h2 id="modalTitle">프로젝트 추가</h2>
+
+      <div class="field">
+        <label for="inpTitle">제목</label>
+        <input class="input" id="inpTitle" type="text" placeholder="예: 빗썸 코인대여 서비스" />
+      </div>
+
+      <div class="field">
+        <label for="inpDesc">설명 (여러 줄 가능)</label>
+        <textarea class="textarea" id="inpDesc" placeholder="여기에 설명을 입력하세요."></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn" id="btnCancel">취소</button>
+        <button class="btn primary" id="btnSave">저장 후 업로드</button>
+      </div>
+
+      <div class="muted" id="modalStatus" style="margin-top:10px;"></div>
+    </div>
   </div>
-  
+
   <script>
     const API_BASE = location.origin; // 같은 도메인
     document.getElementById("apiBase").textContent = API_BASE;
@@ -150,22 +153,27 @@
     const tbody = document.getElementById("tbody");
     const btnReload = document.getElementById("btnReload");
     const btnAdd = document.getElementById("btnAdd");
+
     const modalBackdrop = document.getElementById("modalBackdrop");
     const inpTitle = document.getElementById("inpTitle");
     const inpDesc = document.getElementById("inpDesc");
     const btnCancel = document.getElementById("btnCancel");
     const btnSave = document.getElementById("btnSave");
     const modalStatus = document.getElementById("modalStatus");
+
     const imgProjectId = document.getElementById("imgProjectId");
     const imgSortNo = document.getElementById("imgSortNo");
     const imgFile = document.getElementById("imgFile");
     const btnUploadImg = document.getElementById("btnUploadImg");
     const imgStatus = document.getElementById("imgStatus");
+
     const projModalBackdrop = document.getElementById("projModalBackdrop");
+    const projModalTitle = document.getElementById("projModalTitle");
     const projMeta = document.getElementById("projMeta");
     const projImages = document.getElementById("projImages");
     const projImgStatus = document.getElementById("projImgStatus");
     const projModalClose = document.getElementById("projModalClose");
+
     const projTitleInput = document.getElementById("projTitleInput");
     const projDescInput = document.getElementById("projDescInput");
     const btnProjTogglePublic = document.getElementById("btnProjTogglePublic");
@@ -173,125 +181,41 @@
     const btnProjSave = document.getElementById("btnProjSave");
     const btnProjDelete = document.getElementById("btnProjDelete");
     const projActionStatus = document.getElementById("projActionStatus");
-    btnProjTogglePin.addEventListener("click", async () => {
-    	  if (!currentProject) return;
 
-    	  // ✅ 현재 버튼 텍스트로 "지금 상태"를 판단
-    	  // 버튼이 "고정해제"면 현재 pinned=true, "상단고정"이면 pinned=false
-    	  const currentlyPinned = btnProjTogglePin.textContent.includes("고정해제");
-    	  const next = !currentlyPinned;
+    // 현재 선택된 프로젝트(모달)
+    let currentProject = null; // {id, title, description, isPublic, pinned, ...}
 
-    	  projActionStatus.textContent = "고정 상태 변경 중...";
-    	// 공개/비공개 토글
-    	  btnProjTogglePublic.addEventListener("click", async () => {
-    	    if (!currentProject) return;
-
-    	    const next = !currentProject.isPublic;
-    	    projActionStatus.textContent = "공개 상태 변경 중...";
-    	    btnProjTogglePublic.disabled = true;
-
-    	    try {
-    	      const res = await fetch(`/api/admin/projects/${currentProject.id}/visibility`, {
-    	        method: "PATCH",
-    	        headers: { "Content-Type": "application/json" },
-    	        body: JSON.stringify({ isPublic: next }),
-    	      });
-    	      const data = await res.json().catch(() => null);
-    	      if (!res.ok || !data?.ok) {
-    	        projActionStatus.textContent = `변경 실패 (HTTP ${res.status})`;
-    	        return;
-    	      }
-
-    	      currentProject.isPublic = next;
-    	      refreshProjectButtons();
-    	      projMeta.textContent =
-    	        `ID ${currentProject.id} · ${currentProject.isPublic ? "공개" : "비공개"} · ${currentProject.pinned ? "상단고정" : "일반"}`;
-    	      projActionStatus.textContent = next ? "공개로 전환됨" : "비공개로 전환됨";
-
-    	      await loadProjects();
-    	    } finally {
-    	      btnProjTogglePublic.disabled = false;
-    	    }
-    	  });
-
-    	  // 저장(제목/설명 수정)
-    	  btnProjSave.addEventListener("click", async () => {
-    	    if (!currentProject) return;
-
-    	    const title = (projTitleInput.value || "").trim();
-    	    const description = (projDescInput.value || "").toString();
-
-    	    if (!title) {
-    	      projActionStatus.textContent = "제목은 필수입니다.";
-    	      return;
-    	    }
-
-    	    projActionStatus.textContent = "저장 중...";
-    	    btnProjSave.disabled = true;
-
-    	    try {
-    	      const res = await fetch(`/api/admin/projects/${currentProject.id}`, {
-    	        method: "PATCH",
-    	        headers: { "Content-Type": "application/json" },
-    	        body: JSON.stringify({ title, description }),
-    	      });
-    	      const data = await res.json().catch(() => null);
-    	      if (!res.ok || !data?.ok) {
-    	        projActionStatus.textContent = `저장 실패 (HTTP ${res.status})`;
-    	        return;
-    	      }
-
-    	      currentProject.title = title;
-    	      currentProject.description = description;
-
-    	      projActionStatus.textContent = "저장 완료";
-    	      await loadProjects();
-    	    } finally {
-    	      btnProjSave.disabled = false;
-    	    }
-    	  });
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, (m) => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+      }[m]));
     }
-    	  // 삭제(프로젝트 + 이미지도 함께 삭제)
-    	  btnProjDelete.addEventListener("click", async () => {
-    	    if (!currentProject) return;
-    	    if (!confirm("정말 삭제하시겠습니까? (이미지도 함께 삭제됩니다)")) return;
 
-    	    projActionStatus.textContent = "삭제 중...";
-    	    btnProjDelete.disabled = true;
+    function refreshProjectButtons() {
+      if (!currentProject) return;
+      btnProjTogglePublic.textContent = currentProject.isPublic ? "비공개로 전환" : "공개로 전환";
+      btnProjTogglePin.textContent = currentProject.pinned ? "고정해제" : "상단고정";
+    }
 
-    	    try {
-    	      const res = await fetch(`/api/admin/projects/${currentProject.id}`, {
-    	        method: "DELETE",
-    	      });
-    	      const data = await res.json().catch(() => null);
-    	      if (!res.ok || !data?.ok) {
-    	        projActionStatus.textContent = `삭제 실패 (HTTP ${res.status})`;
-    	        return;
-    	      }
+    function setProjMeta() {
+      if (!currentProject) return;
+      projMeta.textContent =
+        `ID ${currentProject.id} · ${currentProject.isPublic ? "공개" : "비공개"} · ${currentProject.pinned ? "상단고정" : "일반"}`;
+    }
 
-    	      projActionStatus.textContent = "삭제 완료";
-    	      closeProjModal();
-    	      await loadProjects();
-    	    } finally {
-    	      btnProjDelete.disabled = false;
-    	    }
-    	  });
-
-
-
-    let currentProject = null; // {id, title, description, isPublic, pinned}
+    // ===== 모달 열고/닫기 (포커스/aria-hidden 안전) =====
     function openProjModal() {
-    	  closeModal(); // 다른 모달 닫기
-    	  projModalBackdrop.style.display = "flex";
-    	  projModalBackdrop.removeAttribute("aria-hidden");
-    	  setTimeout(() => projModalClose.focus(), 0);
-    	}
+      closeModal(); // 다른 모달 닫기
+      projModalBackdrop.style.display = "flex";
+      projModalBackdrop.removeAttribute("aria-hidden");
+      setTimeout(() => projModalClose.focus(), 0);
+    }
 
-    	function closeProjModal() {
-    	  if (projModalBackdrop.contains(document.activeElement)) document.activeElement.blur();
-    	  projModalBackdrop.style.display = "none";
-    	  projModalBackdrop.setAttribute("aria-hidden", "true");
-    	}
+    function closeProjModal() {
+      if (projModalBackdrop.contains(document.activeElement)) document.activeElement.blur();
+      projModalBackdrop.style.display = "none";
+      projModalBackdrop.setAttribute("aria-hidden", "true");
+    }
 
     projModalClose.addEventListener("click", closeProjModal);
     projModalBackdrop.addEventListener("click", (e) => { if (e.target === projModalBackdrop) closeProjModal(); });
@@ -299,14 +223,38 @@
       if (e.key === "Escape" && projModalBackdrop.style.display === "flex") closeProjModal();
     });
 
+    function openModal() {
+      closeProjModal(); // 다른 모달 닫기
+      modalStatus.textContent = "";
+      inpTitle.value = "";
+      inpDesc.value = "";
+      modalBackdrop.style.display = "flex";
+      modalBackdrop.removeAttribute("aria-hidden");
+      setTimeout(() => inpTitle.focus(), 0);
+    }
+
+    function closeModal() {
+      if (modalBackdrop.contains(document.activeElement)) document.activeElement.blur();
+      modalBackdrop.style.display = "none";
+      modalBackdrop.setAttribute("aria-hidden", "true");
+    }
+
+    btnAdd.addEventListener("click", openModal);
+    btnCancel.addEventListener("click", closeModal);
+    modalBackdrop.addEventListener("click", (e) => { if (e.target === modalBackdrop) closeModal(); });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && modalBackdrop.style.display === "flex") closeModal();
+    });
+
+    // ===== API helpers =====
     async function loadProjectDetailFromList(projectId) {
-      // ✅ 서버에 새 API 만들지 않고, 이미 있는 목록 API에서 찾아서 씀
+      // 서버에 새 API 만들지 않고, 이미 있는 목록 API에서 찾아서 씀
       const res = await fetch("/api/admin/projects");
       if (!res.ok) {
-    	 projActionStatus.textContent = `불러오기 실패 (HTTP ${res.status})`;
+        projActionStatus.textContent = `불러오기 실패 (HTTP ${res.status})`;
         return null;
       }
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       const p = (data.projects || []).find(x => x.id === projectId);
       return p || null;
     }
@@ -327,59 +275,187 @@
       projImgStatus.textContent = images.length ? "" : "등록된 이미지가 없습니다.";
     }
 
+    // ===== 모달 액션(이벤트는 페이지 로드 시 1번만 등록) =====
+
+    // 1) 핀 토글
+    btnProjTogglePin.addEventListener("click", async () => {
+      if (!currentProject) return;
+
+      const next = !currentProject.pinned;
+      projActionStatus.textContent = "고정 상태 변경 중...";
+      btnProjTogglePin.disabled = true;
+
+      try {
+        const res = await fetch(`/api/admin/projects/${currentProject.id}/pin`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ pinned: next }),
+        });
+        const data = await res.json().catch(() => null);
+        if (!res.ok || !data?.ok) {
+          projActionStatus.textContent = `변경 실패 (HTTP ${res.status})`;
+          return;
+        }
+
+        currentProject.pinned = next;
+        refreshProjectButtons();
+        setProjMeta();
+        projActionStatus.textContent = next ? "상단 고정됨" : "고정 해제됨";
+
+        await loadProjects(); // 목록 정렬 반영
+      } finally {
+        btnProjTogglePin.disabled = false;
+      }
+    });
+
+    // 2) 공개/비공개 토글
+    btnProjTogglePublic.addEventListener("click", async () => {
+      if (!currentProject) return;
+
+      const next = !currentProject.isPublic;
+      projActionStatus.textContent = "공개 상태 변경 중...";
+      btnProjTogglePublic.disabled = true;
+
+      try {
+        const res = await fetch(`/api/admin/projects/${currentProject.id}/visibility`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ isPublic: next }),
+        });
+        const data = await res.json().catch(() => null);
+        if (!res.ok || !data?.ok) {
+          projActionStatus.textContent = `변경 실패 (HTTP ${res.status})`;
+          return;
+        }
+
+        currentProject.isPublic = next;
+        refreshProjectButtons();
+        setProjMeta();
+        projActionStatus.textContent = next ? "공개로 전환됨" : "비공개로 전환됨";
+
+        await loadProjects();
+      } finally {
+        btnProjTogglePublic.disabled = false;
+      }
+    });
+
+    // 3) 저장(제목/설명)
+    btnProjSave.addEventListener("click", async () => {
+      if (!currentProject) return;
+
+      const title = (projTitleInput.value || "").trim();
+      const description = (projDescInput.value || "").toString();
+
+      if (!title) {
+        projActionStatus.textContent = "제목은 필수입니다.";
+        return;
+      }
+
+      projActionStatus.textContent = "저장 중...";
+      btnProjSave.disabled = true;
+
+      try {
+        const res = await fetch(`/api/admin/projects/${currentProject.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title, description }),
+        });
+        const data = await res.json().catch(() => null);
+        if (!res.ok || !data?.ok) {
+          projActionStatus.textContent = `저장 실패 (HTTP ${res.status})`;
+          return;
+        }
+
+        currentProject.title = title;
+        currentProject.description = description;
+
+        projModalTitle.textContent = "프로젝트 편집";
+        setProjMeta();
+        projActionStatus.textContent = "저장 완료";
+
+        await loadProjects();
+      } finally {
+        btnProjSave.disabled = false;
+      }
+    });
+
+    // 4) 삭제
+    btnProjDelete.addEventListener("click", async () => {
+      if (!currentProject) return;
+      if (!confirm("정말 삭제하시겠습니까? (이미지도 함께 삭제됩니다)")) return;
+
+      projActionStatus.textContent = "삭제 중...";
+      btnProjDelete.disabled = true;
+
+      try {
+        const res = await fetch(`/api/admin/projects/${currentProject.id}`, { method: "DELETE" });
+        const data = await res.json().catch(() => null);
+        if (!res.ok || !data?.ok) {
+          projActionStatus.textContent = `삭제 실패 (HTTP ${res.status})`;
+          return;
+        }
+
+        projActionStatus.textContent = "삭제 완료";
+        closeProjModal();
+        await loadProjects();
+      } finally {
+        btnProjDelete.disabled = false;
+      }
+    });
+
+    // ===== 제목 클릭 → 편집 모달 열기 + 로드 =====
     document.addEventListener("click", async (e) => {
-    	  const titleBtn = e.target.closest(".btn-title");
-    	  if (!titleBtn) return;
+      const titleBtn = e.target.closest(".btn-title");
+      if (!titleBtn) return;
 
-    	  const projectId = Number(titleBtn.dataset.id);
-    	  openProjModal();
+      const projectId = Number(titleBtn.dataset.id);
+      openProjModal();
 
-    	  // 초기 UI(편집형)
-    	  projActionStatus.textContent = "불러오는 중...";
-    	  projMeta.textContent = "";
-    	  projTitleInput.value = "";
-    	  projDescInput.value = "";
-    	  projImages.innerHTML = "";
-    	  projImgStatus.textContent = "이미지 불러오는 중...";
+      // 초기 UI(편집형)
+      projActionStatus.textContent = "불러오는 중...";
+      projMeta.textContent = "";
+      projTitleInput.value = "";
+      projDescInput.value = "";
+      projImages.innerHTML = "";
+      projImgStatus.textContent = "이미지 불러오는 중...";
 
-    	  // 버튼 잠금(로드 전)
-    	  btnProjTogglePublic.disabled = true;
-    	  btnProjTogglePin.disabled = true;
-    	  btnProjSave.disabled = true;
-    	  btnProjDelete.disabled = true;
+      // 버튼 잠금(로드 전)
+      btnProjTogglePublic.disabled = true;
+      btnProjTogglePin.disabled = true;
+      btnProjSave.disabled = true;
+      btnProjDelete.disabled = true;
 
-    	  const p = await loadProjectDetailFromList(projectId);
-    	  if (!p) {
-    	    projActionStatus.textContent = "프로젝트를 찾을 수 없습니다.";
-    	    projImgStatus.textContent = "";
-    	    return;
-    	  }
+      const p = await loadProjectDetailFromList(projectId);
+      if (!p) {
+        projActionStatus.textContent = "프로젝트를 찾을 수 없습니다.";
+        projImgStatus.textContent = "";
+        return;
+      }
 
-    	  // 현재 프로젝트 상태 저장
-    	  currentProject = { ...p };
+      currentProject = { ...p };
 
-    	  // 편집 input 채우기
-    	  projTitleInput.value = currentProject.title || "";
-    	  projDescInput.value = currentProject.description || "";
+      // input 채우기
+      projTitleInput.value = currentProject.title || "";
+      projDescInput.value = currentProject.description || "";
 
-    	  // 메타 표시
-    	  projMeta.textContent = `ID ${currentProject.id} · ${currentProject.isPublic ? "공개" : "비공개"} · ${currentProject.pinned ? "상단고정" : "일반"}`;
-    	  projActionStatus.textContent = "불러오기 완료";
+      // 메타/버튼
+      setProjMeta();
+      refreshProjectButtons();
 
-    	  // 버튼 텍스트 갱신 + 잠금 해제
-    	  refreshProjectButtons();
-    	  btnProjTogglePublic.disabled = false;
-    	  btnProjTogglePin.disabled = false;
-    	  btnProjSave.disabled = false;
-    	  btnProjDelete.disabled = false;
+      projActionStatus.textContent = "불러오기 완료";
 
-    	  // 이미지 로드/표시(기존 함수 재사용)
-    	  const images = await loadProjectImages(projectId);
-    	  renderImages(images);
-    	});
+      // 잠금 해제
+      btnProjTogglePublic.disabled = false;
+      btnProjTogglePin.disabled = false;
+      btnProjSave.disabled = false;
+      btnProjDelete.disabled = false;
 
+      // 이미지
+      const images = await loadProjectImages(projectId);
+      renderImages(images);
+    });
 
-
+    // ===== 이미지 업로드(임시) =====
     btnUploadImg.addEventListener("click", async () => {
       const projectId = Number(imgProjectId.value);
       const sortNo = Number(imgSortNo.value || 1);
@@ -412,40 +488,7 @@
       }
     });
 
-
-    function openModal() {
-    	  // 다른 모달이 열려있으면 닫기
-    	  closeProjModal();
-
-    	  modalStatus.textContent = "";
-    	  inpTitle.value = "";
-    	  inpDesc.value = "";
-
-    	  modalBackdrop.style.display = "flex";
-    	  modalBackdrop.removeAttribute("aria-hidden");
-
-    	  setTimeout(() => inpTitle.focus(), 0);
-    	}
-
-    	function closeModal() {
-    	  // 모달 안에 포커스가 있으면 먼저 blur
-    	  if (modalBackdrop.contains(document.activeElement)) {
-    	    document.activeElement.blur();
-    	  }
-    	  modalBackdrop.style.display = "none";
-    	  modalBackdrop.setAttribute("aria-hidden", "true");
-    	}
-
-
-    btnAdd.addEventListener("click", openModal);
-    btnCancel.addEventListener("click", closeModal);
-    modalBackdrop.addEventListener("click", (e) => {
-      if (e.target === modalBackdrop) closeModal();
-    });
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && modalBackdrop.style.display === "flex") closeModal();
-    });
-
+    // ===== 프로젝트 추가 =====
     btnSave.addEventListener("click", async () => {
       const title = (inpTitle.value || "").trim();
       const description = (inpDesc.value || "").toString();
@@ -475,7 +518,7 @@
 
         modalStatus.textContent = "저장 완료!";
         closeModal();
-        await loadProjects(); // 저장 후 목록 갱신
+        await loadProjects();
       } catch (err) {
         modalStatus.textContent = "저장 중 오류가 발생했습니다.";
       } finally {
@@ -483,21 +526,7 @@
       }
     });
 
-    function escapeHtml(s) {
-      return String(s).replace(/[&<>"']/g, (m) => ({
-        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-      }[m]));
-    }
-    function refreshProjectButtons() {
-    	  if (!currentProject) return;
-
-    	  btnProjTogglePublic.textContent =
-    	    currentProject.isPublic ? "비공개로 전환" : "공개로 전환";
-
-    	  btnProjTogglePin.textContent =
-    	    currentProject.pinned ? "고정해제" : "상단고정";
-    	}
-
+    // ===== 리스트 로딩 =====
     async function loadProjects() {
       statusEl.textContent = "불러오는 중...";
       tbl.style.display = "none";
@@ -508,7 +537,7 @@
         statusEl.textContent = `불러오기 실패 (HTTP ${res.status})`;
         return;
       }
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       const projects = data.projects || [];
 
       if (projects.length === 0) {
@@ -526,94 +555,98 @@
           <tr>
             <td class="mono">${p.id}</td>
             <td>
-	          <button class="btn btn-title" data-id="${p.id}" style="width:100%; text-align:left;">
-	            ${escapeHtml(p.title)}
-	          </button>
-	        </td>
+              <button class="btn btn-title" data-id="${p.id}" style="width:100%; text-align:left;">
+                ${escapeHtml(p.title)}
+              </button>
+            </td>
             <td>${badge}</td>
             <td class="mono">${escapeHtml(p.createdAt || "")}</td>
             <td>
-	            <div class="row">
-	              <button class="btn btn-edit" data-id="${p.id}">수정</button>
-	              <button class="btn btn-toggle" data-id="${p.id}" data-public="${p.isPublic}">
-	                ${p.isPublic ? "비공개" : "공개"}
-	              </button>
-	              <button class="btn btn-pin" data-id="${p.id}" data-pinned="${p.pinned}">
-		            ${p.pinned ? "고정해제" : "상단고정"}
-		          </button>
-	              <button class="btn danger btn-delete" data-id="${p.id}">삭제</button>
-	            </div>
-	          </td>	
+              <div class="row">
+                <!-- 나중에 리스트 버튼을 없앨 예정이라 하셔서, 일단 남겨두되 기존 로직 그대로 -->
+                <button class="btn btn-edit" data-id="${p.id}">수정</button>
+                <button class="btn btn-toggle" data-id="${p.id}" data-public="${p.isPublic}">
+                  ${p.isPublic ? "비공개" : "공개"}
+                </button>
+                <button class="btn btn-pin" data-id="${p.id}" data-pinned="${p.pinned}">
+                  ${p.pinned ? "고정해제" : "상단고정"}
+                </button>
+                <button class="btn danger btn-delete" data-id="${p.id}">삭제</button>
+              </div>
+            </td>
           </tr>
         `;
       }).join("");
     }
 
     btnReload.addEventListener("click", loadProjects);
-    loadProjects();
+
+    // 리스트 버튼(임시)
     document.addEventListener("click", async (e) => {
-    	  const editBtn = e.target.closest(".btn-edit");
-    	  const toggleBtn = e.target.closest(".btn-toggle");
-    	  const deleteBtn = e.target.closest(".btn-delete");
-    	  const pinBtn = e.target.closest(".btn-pin");
-    	  if (pinBtn) {
-    		  const id = pinBtn.dataset.id;
+      const editBtn = e.target.closest(".btn-edit");
+      const toggleBtn = e.target.closest(".btn-toggle");
+      const deleteBtn = e.target.closest(".btn-delete");
+      const pinBtn = e.target.closest(".btn-pin");
 
-    		  const pinnedRaw = pinBtn.dataset.pinned; // "true"/"false" 또는 "1"/"0"
-    		  const pinned = (pinnedRaw === "true" || pinnedRaw === "1");
+      if (pinBtn) {
+        const id = pinBtn.dataset.id;
+        const pinnedRaw = pinBtn.dataset.pinned;
+        const pinned = (pinnedRaw === "true" || pinnedRaw === "1");
 
-    		  await fetch(`/api/admin/projects/${id}/pin`, {
-    		    method: "PATCH",
-    		    headers: { "Content-Type": "application/json" },
-    		    body: JSON.stringify({ pinned: !pinned })
-    		  });
+        await fetch(`/api/admin/projects/${id}/pin`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ pinned: !pinned })
+        });
 
-    		  await loadProjects();
-    		  return;
-    		}
+        await loadProjects();
+        return;
+      }
 
-    	  if (editBtn) {
-    	    const id = editBtn.dataset.id;
-    	    const row = editBtn.closest("tr");
-    	    const title = row.children[1].innerText;
+      if (editBtn) {
+        const id = editBtn.dataset.id;
+        const row = editBtn.closest("tr");
+        const title = row.children[1].innerText;
 
-    	    const newTitle = prompt("제목 수정", title);
-    	    if (!newTitle) return;
+        const newTitle = prompt("제목 수정", title);
+        if (!newTitle) return;
 
-    	    await fetch(`/api/admin/projects/${id}`, {
-    	      method: "PATCH",
-    	      headers: { "Content-Type": "application/json" },
-    	      body: JSON.stringify({ title: newTitle, description: "" })
-    	    });
+        await fetch(`/api/admin/projects/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title: newTitle, description: "" })
+        });
 
-    	    await loadProjects();
-    	  }
+        await loadProjects();
+        return;
+      }
 
-    	  if (toggleBtn) {
-    	    const id = toggleBtn.dataset.id;
-    	    const isPublic = toggleBtn.dataset.public === "true";
+      if (toggleBtn) {
+        const id = toggleBtn.dataset.id;
+        const isPublic = toggleBtn.dataset.public === "true";
 
-    	    await fetch(`/api/admin/projects/${id}/visibility`, {
-    	      method: "PATCH",
-    	      headers: { "Content-Type": "application/json" },
-    	      body: JSON.stringify({ isPublic: !isPublic })
-    	    });
+        await fetch(`/api/admin/projects/${id}/visibility`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ isPublic: !isPublic })
+        });
 
-    	    await loadProjects();
-    	  }
+        await loadProjects();
+        return;
+      }
 
-    	  if (deleteBtn) {
-    	    const id = deleteBtn.dataset.id;
-    	    if (!confirm("정말 삭제하시겠습니까?")) return;
+      if (deleteBtn) {
+        const id = deleteBtn.dataset.id;
+        if (!confirm("정말 삭제하시겠습니까?")) return;
 
-    	    await fetch(`/api/admin/projects/${id}`, {
-    	      method: "DELETE"
-    	    });
+        await fetch(`/api/admin/projects/${id}`, { method: "DELETE" });
+        await loadProjects();
+        return;
+      }
+    });
 
-    	    await loadProjects();
-    	  }
-    	});
-
+    // 최초 로드
+    loadProjects();
   </script>
 </body>
 </html>
