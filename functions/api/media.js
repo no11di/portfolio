@@ -62,9 +62,9 @@ export const onRequestGet = async ({ request, env }) => {
   // ✅ R2 바인딩 이름을 "반드시" 사용자님 실제 이름으로 맞추셔야 합니다.
   // 지금 프로젝트에서 R2 바인딩이 env.PORTFOLIO_MEDIA 라고 가정합니다.
   // 만약 wrangler.toml에 다른 이름이면 여기만 바꾸면 됩니다.
-  const bucket = env.PORTFOLIO_MEDIA;
+  const bucket = env.MEDIA;
   if (!bucket) {
-    return new Response("R2 binding missing: PORTFOLIO_MEDIA", { status: 500 });
+    return new Response("R2 binding missing: MEDIA", { status: 500 });
   }
 
   const candidates = normalizeKeyCandidates(key);

@@ -211,7 +211,7 @@
 
     function getPublicImageUrl(objectKey) {
       // 현재 네트워크에서 /api/media?key=... 로 요청이 가는 구조를 사용합니다.
-      return `/api/media?key=${encodeURIComponent(objectKey)}`;
+      return `/api/media?key=${encodeURIComponent(objectKey)}&v=${Date.now()}`;
     }
 
     function refreshProjectButtons() {
